@@ -737,7 +737,7 @@ async function submitCheckout(e){
 
     const orderItems = (data.items || []).map(it=>{
       const meta = CAT_BY_SKU[it.sku] || {};
-      return { ...it, brand: meta.brand, code: meta.code, gender: meta.gender, img: meta.img };
+      return { ...it, brand: meta.brand, code: meta.code, gender: meta.gender, img: meta.img, link: meta.link };
     });
     lastOrder = {
       id: data.order_id,
@@ -890,6 +890,7 @@ async function buildOrderPDFDoc(order, silent){
     }else{
       doc.setDrawColor(225); doc.rect(marginX, y, 38, 38);
     }
+    if(it.link){ doc.link(marginX, y, 38, 38, { url: it.link }); }
     const unitGross = Number(it.unit_price);
     const discount = Number(it.discount);
     const unitNet = unitGross * (1 - discount/100);
@@ -897,7 +898,13 @@ async function buildOrderPDFDoc(order, silent){
     const grossLine = unitGross * it.box_qty * it.qty;
     subtotalGross += grossLine;
     doc.setFont('helvetica','bold'); doc.setFontSize(9.5);
-    doc.text((it.brand||'') + ' — ' + (it.code||it.sku), marginX + 48, y + 12);
+    if(it.link){
+      doc.setTextColor(30,90,200);
+      doc.textWithLink((it.brand||'') + ' — ' + (it.code||it.sku), marginX + 48, y + 12, { url: it.link });
+      doc.setTextColor(0);
+    }else{
+      doc.text((it.brand||'') + ' — ' + (it.code||it.sku), marginX + 48, y + 12);
+    }
     doc.setFont('helvetica','normal'); doc.setFontSize(8.5); doc.setTextColor(120);
     doc.text('SKU ' + it.sku + (it.gender?(' · ' + it.gender):''), marginX + 48, y + 24);
     doc.setTextColor(0);
