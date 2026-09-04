@@ -794,7 +794,15 @@ function arrayBufferToBase64(buffer){
   for(let i=0;i<bytes.byteLength;i++){ binary += String.fromCharCode(bytes[i]); }
   return btoa(binary);
 }
+const IMAGE_ASSET_CACHE = new Map();
 async function fetchImageAsset(url){
+  if(IMAGE_ASSET_CACHE.has(url)) return IMAGE_ASSET_CACHE.get(url);
+  const asset = await fetchImageAssetUncached(url);
+  if(asset) IMAGE_ASSET_CACHE.set(url, asset);
+  return asset;
+}
+async function fetchImageAssetUncached(url, attempt){
+  attempt = attempt || 1;
   try{
     const res = await fetch(IMAGE_PROXY + encodeURIComponent(url));
     if(!res.ok) throw new Error('bad status');
@@ -817,6 +825,10 @@ async function fetchImageAsset(url){
       return { base64, ext, dataUrl: 'data:' + (blob.type||'image/jpeg') + ';base64,' + base64 };
     }
   }catch(e){
+    if(attempt < 2){
+      await new Promise(r => setTimeout(r, 400));
+      return fetchImageAssetUncached(url, attempt + 1);
+    }
     return null;
   }
 }
@@ -1052,10 +1064,12 @@ async function buildOrderExcelWorkbook(order, silent){
     if(asset){
       try{
         const imgId = workbook.addImage({ base64: asset.base64, extension: asset.ext==='png'?'png':'jpeg' });
+        // Ancla de una sola celda (tl + ext en píxeles): es el formato de imagen más
+        // compatible entre Excel de escritorio, Excel Online, Google Sheets y móvil.
+        // El anchor de dos celdas (tl/br) usado antes no se veía en algunos de estos visores.
         sheet.addImage(imgId, {
-          tl: { col: 0.08, row: (rowIdx - 1) + 0.08 },
-          br: { col: 0.92, row: (rowIdx - 1) + 0.92 },
-          editAs: 'oneCell'
+          tl: { col: 0.06, row: (rowIdx - 1) + 0.06 },
+          ext: { width: 58, height: 58 }
         });
       }catch(e){}
     }
