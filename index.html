@@ -65,6 +65,7 @@ h1,h2,h3{font-family:'Playfair Display',Georgia,serif;}
 .hero-stats{
   display:flex;justify-content:center;gap:14px;flex-wrap:wrap;
 }
+.hero-stats[hidden], .hero p.sub[hidden]{ display:none; }
 .stat-pill{
   background:rgba(255,255,255,.06);
   border:1px solid rgba(201,162,75,.35);
@@ -1139,7 +1140,8 @@ async function shareOrderExcel(order){
 async function sendOrderEmailInBackground(order){
   try{
     const doc = await buildOrderPDFDoc(order, true);
-    const pdfBase64 = doc.output('base64');
+    const pdfArrayBuffer = doc.output('arraybuffer');
+    const pdfBase64 = arrayBufferToBase64(pdfArrayBuffer);
 
     const workbook = await buildOrderExcelWorkbook(order, true);
     const excelBuf = await workbook.xlsx.writeBuffer();
