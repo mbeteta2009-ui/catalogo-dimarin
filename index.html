@@ -594,12 +594,20 @@ function refreshAllStockUI(){
 
 async function refreshStockOnly(){
   try{
-    const { data, error } = await sb.from('products').select('sku, stock_boxes').eq('active', true);
+    const { data, error } = await sb.from('products').select('sku, stock_boxes, unit_price, discount, box_qty').eq('active', true);
     if(error) throw error;
-    (data||[]).forEach(r=>{ if(CAT_BY_SKU[r.sku]) CAT_BY_SKU[r.sku].stockBoxes = Number(r.stock_boxes); });
+    (data||[]).forEach(r=>{
+      const it = CAT_BY_SKU[r.sku];
+      if(!it) return;
+      it.stockBoxes = Number(r.stock_boxes);
+      it.unitPrice  = Number(r.unit_price);
+      it.discount   = Number(r.discount);
+      it.boxQty     = Number(r.box_qty);
+    });
     renderCatalog();
     applyFilters();
     updateHeroStats();
+    renderCart();
   }catch(e){ console.error(e); }
 }
 
@@ -1168,6 +1176,7 @@ async function sendOrderEmailInBackground(order){
 /* ---------- INIT ---------- */
 loadCatalog();
 setInterval(refreshStockOnly, 3 * 60 * 1000);
+document.addEventListener('visibilitychange', ()=>{ if(document.visibilityState==='visible') refreshStockOnly(); });
 </script>
 </body>
 </html>
