@@ -1693,8 +1693,15 @@ async function buildOrderPDFDoc(order, silent){
     doc.text(money(it.box_net), colBoxX, y + 16);
     if(note){
       doc.setTextColor(176,0,32);
-      doc.text(note, colPromoX, y + 16);
-      if(promoRed) doc.text('−' + money(it.promo_discount), colPromoX, y + 27);
+      const cleanNote = note.replace(/^−/, '');
+      if(promoRed){
+        doc.setFont('helvetica','bold');
+        doc.text('Ahorro ' + money(it.promo_discount), colPromoX, y + 13);
+        doc.setFont('helvetica','normal');
+        doc.text(cleanNote, colPromoX, y + 25);
+      }else{
+        doc.text(cleanNote, colPromoX, y + 16);
+      }
       doc.setTextColor(0);
     }else{
       doc.text('—', colPromoX, y + 16);
@@ -1708,8 +1715,8 @@ async function buildOrderPDFDoc(order, silent){
 
   const lines = [];
   lines.push({ t:'Subtotal:', v: money(order.subtotal), red:false });
-  (order.promos||[]).forEach(p => lines.push({ t: p.label, v: '−' + money(p.amount), red:true }));
-  if(y + 30 + lines.length*16 + 40 > pageH - 30){ doc.addPage(); y = 40; }
+  (order.promos||[]).forEach(p => lines.push({ t: p.label, v: '- ' + money(p.amount), red:true }));
+  if(y + 30 + lines.length*16 + 70 > pageH - 30){ doc.addPage(); y = 40; }
   y += 10;
   doc.setDrawColor(0); doc.setLineWidth(1);
   doc.line(pageW - marginX - 330, y, pageW - marginX, y);
@@ -1725,6 +1732,12 @@ async function buildOrderPDFDoc(order, silent){
   y += 8;
   doc.setFont('helvetica','bold'); doc.setFontSize(14);
   doc.text('Total: ' + money(order.total), pageW - marginX, y, { align:'right' });
+  if(Number(order.discountTotal) > 0){
+    y += 16;
+    doc.setFont('helvetica','bold'); doc.setFontSize(10); doc.setTextColor(176,0,32);
+    doc.text('Total ahorrado en promociones: ' + money(order.discountTotal), pageW - marginX, y, { align:'right' });
+    doc.setTextColor(0);
+  }
   return doc;
 }
 
@@ -1758,7 +1771,7 @@ async function buildOrderExcelWorkbook(order, silent){
   const sheet = workbook.addWorksheet('Pedido');
   sheet.columns = [
     { width: 10 }, { width: 16 }, { width: 18 }, { width: 14 }, { width: 10 }, { width: 16 },
-    { width: 11 }, { width: 12 }, { width: 14 }, { width: 14 }, { width: 14 }, { width: 22 }, { width: 14 }, { width: 14 }
+    { width: 11 }, { width: 12 }, { width: 14 }, { width: 14 }, { width: 14 }, { width: 26 }, { width: 15 }, { width: 14 }
   ];
   sheet.mergeCells('A1:N1');
   sheet.getCell('A1').value = 'Pedido Mayorista — Kenman, SA | Dimarin';
@@ -1795,7 +1808,17 @@ async function buildOrderExcelWorkbook(order, silent){
     row.getCell(9).value = Number(it.unit_price);
     row.getCell(10).value = Number(it.box_net);
     row.getCell(11).value = Number(it.gross_total);
-    row.getCell(12).value = orderItemNote(it) || '—';
+    const xNote = orderItemNote(it);
+    if(xNote && Number(it.promo_discount) > 0){
+      row.getCell(12).value = { richText: [
+        { text: 'Ahorro ' + money(it.promo_discount) + '\n', font:{ bold:true, color:{ argb:'FFB00020' } } },
+        { text: xNote.replace(/^−/, '-'), font:{ color:{ argb:'FFB00020' } } }
+      ] };
+    }else{
+      row.getCell(12).value = xNote || '—';
+    }
+    row.getCell(12).alignment = { wrapText:true, vertical:'middle' };
+    for(let c=1;c<=14;c++){ if(c!==12) row.getCell(c).alignment = { vertical:'middle', horizontal: c>=7 && c!==12 ? 'right' : undefined }; }
     row.getCell(13).value = -Number(it.promo_discount || 0);
     row.getCell(14).value = Number(it.line_total);
     const asset = it.img ? await fetchImageAsset(it.img, { maxPx:300, quality:0.8 }) : null;
@@ -1811,13 +1834,15 @@ async function buildOrderExcelWorkbook(order, silent){
   let sr = rowIdx + 1;
   const put = (label, val, opts) => {
     const row = sheet.getRow(sr++);
-    row.getCell(13).value = label; row.getCell(13).font = { bold:true, size:(opts&&opts.size)||11 };
+    row.getCell(12).value = label; row.getCell(12).alignment = { horizontal:'right' };
+    row.getCell(12).font = { bold:true, size:(opts&&opts.size)||11, color: (opts&&opts.red)?{ argb:'FFB00020' }:undefined };
     row.getCell(14).value = val; row.getCell(14).numFmt = '"U$"#,##0.00';
     row.getCell(14).font = { bold: !!(opts&&opts.bold), size:(opts&&opts.size)||11, color: (opts&&opts.red)?{ argb:'FFB00020' }:undefined };
   };
   put('Subtotal:', Number(order.subtotal));
   (order.promos||[]).forEach(p => put(p.label, -Number(p.amount), { red:true }));
   put('TOTAL', Number(order.total), { bold:true, size:12 });
+  if(Number(order.discountTotal) > 0) put('Total ahorrado en promociones', Number(order.discountTotal), { red:true, bold:true });
   return workbook;
 }
 async function generateOrderExcel(order){
