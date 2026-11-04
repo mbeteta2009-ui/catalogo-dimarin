@@ -266,7 +266,7 @@ footer{padding:34px 22px;text-align:center;color:var(--muted);font-size:12px;bac
 .chip-promo.C{background:#efe6f7;color:#5a2d82;}
 
 /* ===== PROMOCIONES EN EL CARRITO ===== */
-#cartPromo{padding:0 12px 10px;max-height:44%;overflow-y:auto;border-top:1px solid #f0f0f0;}
+#cartPromo{padding:0 12px 10px;max-height:58%;overflow-y:auto;border-top:1px solid #f0f0f0;}
 #cartPromo:empty{display:none;}
 .promo-box{border-radius:10px;padding:10px 12px;font-size:12.5px;margin-top:8px;line-height:1.45;}
 .promo-box .ttl{font-weight:800;display:block;margin-bottom:3px;}
@@ -286,6 +286,47 @@ footer{padding:34px 22px;text-align:center;color:var(--muted);font-size:12px;bac
 .modal ul.warn-list{margin:0 0 6px;padding-left:18px;font-size:13px;line-height:1.55;color:#5b4a14;}
 .modal ul.warn-list li{margin-bottom:8px;}
 #exportModal .btn{margin-top:6px;}
+
+/* Columnas ajustables */
+.grid{grid-template-columns:repeat(var(--cols,5),minmax(0,1fr));}
+.cols-ctl{display:inline-flex;align-items:center;gap:2px;border:1px solid var(--line);border-radius:10px;background:#fff;padding:2px;}
+.cols-ctl .lbl{font-size:12px;color:var(--muted);padding:0 4px 0 8px;white-space:nowrap;}
+.cols-ctl button{width:30px;height:30px;border:none;background:transparent;border-radius:8px;font-size:17px;font-weight:700;cursor:pointer;color:var(--dark);}
+.cols-ctl button:hover:not(:disabled){background:#f1eee6;}
+.cols-ctl button:disabled{opacity:.3;cursor:not-allowed;}
+.cols-ctl .val{min-width:22px;text-align:center;font-weight:800;font-size:13px;}
+body[data-dens="1"] .grid{gap:11px;padding:0 14px;}
+body[data-dens="1"] .card img{height:150px;padding:6px;}
+body[data-dens="1"] .card-body{padding:8px 9px 11px;gap:4px;}
+body[data-dens="1"] .brand{font-size:11.5px;}
+body[data-dens="1"] .code{font-size:10.5px;}
+body[data-dens="1"] .price-unit .unit-net{font-size:17px;}
+body[data-dens="1"] .btn-add{font-size:11px;padding:8px 4px;}
+body[data-dens="1"] .chip-gender,body[data-dens="1"] .chip-pres,body[data-dens="1"] .chip-promo{font-size:9.5px;padding:2px 6px;}
+body[data-dens="2"] .grid{gap:8px;padding:0 10px;}
+body[data-dens="2"] .card img{height:112px;padding:4px;}
+body[data-dens="2"] .card-body{padding:6px 7px 9px;gap:3px;}
+body[data-dens="2"] .brand{font-size:10px;}
+body[data-dens="2"] .code{font-size:9px;overflow-wrap:anywhere;}
+body[data-dens="2"] .price-unit .unit-net{font-size:14px;}
+body[data-dens="2"] .price-unit .unit-label,body[data-dens="2"] .price-box .box-label{font-size:8px;}
+body[data-dens="2"] .price-box .box-net{font-size:10.5px;}
+body[data-dens="2"] .stock-chip{font-size:9px;padding:2px 5px;}
+body[data-dens="2"] .btn-add{font-size:9.5px;padding:7px 2px;margin-top:6px;}
+body[data-dens="2"] .chip-gender,body[data-dens="2"] .chip-pres,body[data-dens="2"] .chip-promo{font-size:8.5px;padding:1px 5px;}
+body[data-dens="2"] .badges{gap:3px;}
+
+/* Detalle de promociones */
+.pd-toggle{display:block;margin:8px 0 0;background:none;border:none;padding:2px 0;color:#1f6b3a;font-weight:700;font-size:12.5px;cursor:pointer;text-decoration:underline;}
+.pd{margin-top:8px;border-top:1px solid #cfe5d6;padding-top:6px;font-size:12px;color:#234;}
+.pd-h{font-weight:800;margin-top:8px;color:#1f5a33;}
+.pd-h small,.pd-n small{display:block;font-weight:400;color:#5b6b60;font-size:11px;}
+.pd-row{display:flex;justify-content:space-between;gap:10px;padding:5px 0;border-bottom:1px dashed #cfe5d6;}
+.pd-n{min-width:0;overflow-wrap:anywhere;}
+.pd-a{white-space:nowrap;font-weight:700;}
+.pd-a.neg{color:#1f6b3a;}
+.pd-sub{font-size:11px;color:#6b6b6b;padding:4px 0;}
+.pd-tot{display:flex;justify-content:space-between;font-weight:800;padding:5px 0 2px;}
 
 </style>
 </head>
@@ -320,6 +361,7 @@ footer{padding:34px 22px;text-align:center;color:var(--muted);font-size:12px;bac
     <button type="button" class="btn btn-outline btn-sm" onclick="clearFilters()">Limpiar filtros</button>
   </div>
   <div class="toolbar-actions">
+    <div class="cols-ctl" title="Artículos por fila"><span class="lbl">▦ Por fila</span><button type="button" id="colsMinus" onclick="changeCols(-1)" aria-label="Menos columnas">−</button><span class="val" id="colsVal">5</span><button type="button" id="colsPlus" onclick="changeCols(1)" aria-label="Más columnas">+</button></div>
     <button class="btn btn-outline" onclick="loadCatalog()" title="Actualizar catálogo">↻</button>
     <button class="btn btn-outline" onclick="openPromoInfo()">🏷 Promociones</button>
     <button class="btn btn-outline" id="btnCatalogPdf" onclick="exportCatalogPDF()" title="Descargar PDF de los artículos filtrados">📄 PDF</button>
@@ -705,7 +747,7 @@ async function loadCatalog(){
       PROMO_BRANDS = {};
       pb.data.forEach(r => { PROMO_BRANDS[r.brand] = r.promo; });
     }
-    CATALOG = rows.map(r => ({
+    CATALOG = rows.filter(r => normText(r.brand) !== 'perfumeria').map(r => ({
       sku: r.sku, code: r.code, brand: r.brand, gender: r.gender,
       unitPrice: Number(r.unit_price), boxQty: Number(r.box_qty) || 1,
       stockBoxes: Number(r.stock_boxes), img: r.img, link: r.link,
@@ -713,6 +755,8 @@ async function loadCatalog(){
     }));
     CAT_BY_SKU = {};
     CATALOG.forEach(it => CAT_BY_SKU[it.sku] = it);
+    Object.keys(cart).forEach(s => { if(!CAT_BY_SKU[s]) delete cart[s]; });
+    saveCart();
     refreshView();
     updateHeroStats();
     renderCart();
@@ -964,6 +1008,33 @@ function toggleCart(open){
   document.getElementById('overlay').classList.toggle('open', open);
 }
 
+let PROMO_DETAIL_OPEN = false;
+function togglePromoDetail(){ PROMO_DETAIL_OPEN = !PROMO_DETAIL_OPEN; renderCart(); }
+function itemName(it){ return (it.brand||'') + ' · ' + (it.code||it.sku); }
+function promoDetailHTML(calc){
+  const row = (name, mid, amt, neg) => `<div class="pd-row"><div class="pd-n">${esc(name)}<small>${mid}</small></div><div class="pd-a${neg?' neg':''}">${amt}</div></div>`;
+  let h = '<div class="pd">';
+  calc.promos.forEach(p=>{
+    const L = calc.lines.filter(l => l.promo === p.promo && (p.promo !== 'C' || l.it.brand === p.brand));
+    if(p.promo === 'A'){
+      h += `<div class="pd-h">PROMO A · ${p.pct}% de descuento<small>${p.boxes} cajas en el segmento (se suman todas las marcas)</small></div>`;
+      L.forEach(l => { h += row(itemName(l.it), `${l.qty} ${plural(l.qty,'caja','cajas')} × ${money(l.boxC/100)} = ${money(l.grossC/100)}`, '−' + money(l.discC/100), true); });
+    }else if(p.promo === 'B'){
+      h += `<div class="pd-h">PROMO B · ${p.free} ${plural(p.free,'caja gratis','cajas gratis')}<small>${p.boxes} cajas en el segmento · las gratis son las de menor valor</small></div>`;
+      L.filter(l => l.freeBoxes > 0).forEach(l => { h += row(itemName(l.it), `${l.freeBoxes} de ${l.qty} ${plural(l.qty,'caja','cajas')} gratis × ${money(l.boxC/100)}`, '−' + money(l.discC/100), true); });
+      const paid = L.filter(l => !(l.freeBoxes > 0));
+      if(paid.length) h += `<div class="pd-sub">Sin cajas gratis: ${paid.map(l => esc(itemName(l.it)) + ' (' + l.qty + ')').join(', ')}</div>`;
+    }else{
+      h += `<div class="pd-h">PROMO C · ${esc(p.brand)} · ${p.free} ${plural(p.free,'gorra gratis','gorras gratis')}<small>${p.units} gorras de ${esc(p.brand)} · las gratis son las más baratas</small></div>`;
+      L.filter(l => l.freeUnits > 0).forEach(l => { h += row(itemName(l.it), `${l.freeUnits} de ${l.qty*l.it.boxQty} ${plural(l.qty*l.it.boxQty,'gorra','gorras')} gratis × ${money(l.unitMicro/10000)}`, '−' + money(l.discC/100), true); });
+      const paid = L.filter(l => !(l.freeUnits > 0));
+      if(paid.length) h += `<div class="pd-sub">Sin gorras gratis: ${paid.map(l => esc(itemName(l.it)) + ' (' + l.qty*l.it.boxQty + ')').join(', ')}</div>`;
+    }
+    h += `<div class="pd-tot"><span>Ahorro ${SEG_LABEL[p.promo]}${p.promo==='C'?' · '+esc(p.brand):''}</span><span>−${money(p.amountC/100)}</span></div>`;
+  });
+  return h + '</div>';
+}
+
 function renderCart(){
   const cont = document.getElementById('cartItems');
   const calc = calcPromos(cart);
@@ -994,7 +1065,9 @@ function renderCart(){
     promoHtml += `<div class="promo-box promo-warn"><span class="ttl">⚠ Promociones pendientes</span><ul>${calc.pending.map(p=>`<li>${esc(p.text)}</li>`).join('')}</ul></div>`;
   }
   if(calc.promos.length){
-    promoHtml += `<div class="promo-box promo-ok"><span class="ttl">✓ Promociones aplicadas</span><ul>${calc.promos.map(p=>`<li>${esc(p.label)} (−${money(p.amountC/100)})</li>`).join('')}</ul></div>`;
+    promoHtml += `<div class="promo-box promo-ok"><span class="ttl">✓ Promociones aplicadas</span><ul>${calc.promos.map(p=>`<li>${esc(p.label)} (−${money(p.amountC/100)})</li>`).join('')}</ul>` +
+      `<button type="button" class="pd-toggle" onclick="togglePromoDetail()">${PROMO_DETAIL_OPEN?'Ocultar detalle ▴':'Ver detalle ▾'}</button>` +
+      (PROMO_DETAIL_OPEN ? promoDetailHTML(calc) : '') + `</div>`;
   }
   if(calc.hints.length){
     promoHtml += `<div class="promo-box promo-hint"><ul style="margin:0;">${calc.hints.map(h=>`<li>${esc(h.text)}</li>`).join('')}</ul></div>`;
@@ -1174,6 +1247,25 @@ function showConfirm(order){
 }
 function closeConfirm(){ document.getElementById('confirmModal').classList.remove('open'); }
 
+
+/* ---------- COLUMNAS POR FILA ---------- */
+let COLS = 5;
+try{ const sv = parseInt(localStorage.getItem('dimarin_cols'),10); if(sv >= 2 && sv <= 10) COLS = sv; else if(window.innerWidth < 560) COLS = 2; }catch(e){}
+function maxCols(){ const w = window.innerWidth; return w < 560 ? 3 : w < 860 ? 5 : 10; }
+function applyCols(){
+  const n = Math.max(2, Math.min(COLS, maxCols()));
+  document.documentElement.style.setProperty('--cols', n);
+  document.body.dataset.dens = n >= 9 ? '2' : n >= 7 ? '1' : '0';
+  document.getElementById('colsVal').textContent = n;
+  document.getElementById('colsMinus').disabled = n <= 2;
+  document.getElementById('colsPlus').disabled = n >= Math.min(10, maxCols());
+}
+function changeCols(d){
+  const cur = Math.max(2, Math.min(COLS, maxCols()));
+  COLS = Math.max(2, Math.min(10, cur + d));
+  try{ localStorage.setItem('dimarin_cols', String(COLS)); }catch(e){}
+  applyCols();
+}
 /* ---------- IMAGE HELPERS (PDF/Excel) ---------- */
 function arrayBufferToBase64(buffer){
   let binary = '';
@@ -1626,6 +1718,8 @@ async function sendOrderEmailInBackground(order){
     if(e.key==='Escape'){ if(msOpen) msClose(); closeLightbox(); }
   });
 })();
+applyCols();
+window.addEventListener("resize", applyCols);
 loadCatalog();
 setInterval(refreshStockOnly, 3 * 60 * 1000);
 document.addEventListener('visibilitychange', ()=>{ if(document.visibilityState==='visible') refreshStockOnly(); });
