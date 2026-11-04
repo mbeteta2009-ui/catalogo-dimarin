@@ -627,6 +627,7 @@ function plural(n, s, p){ return n===1 ? s : p; }
 function cmpStr(a, b){ return a<b ? -1 : (a>b ? 1 : 0); }
 
 // PROMO A: 5 cajas 10% · 10 cajas 15% · 20 cajas 20% (se suman las cajas de todas las marcas A)
+function cWord(brand){ return brand==='EVERLAST' ? ['accesorio','accesorios'] : ['gorra','gorras']; }
 function pctForA(n){ return n>=20 ? 20 : n>=10 ? 15 : n>=5 ? 10 : 0; }
 // PROMO B: 10 cajas→1 gratis · 20→3 · 30→6 · por cada 100→25 (las de menor valor)
 function freeForB(n){ const r = n % 100; return Math.floor(n/100)*25 + (r>=30 ? 6 : r>=20 ? 3 : r>=10 ? 1 : 0); }
@@ -699,12 +700,12 @@ function calcPromos(cartObj){
       l.discC = Math.floor((f * l.unitMicro + 50) / 100); left -= f;
     });
     if(free > 0){
-      promos.push({ promo:'C', brand, label:'PROMO C · '+brand+' · '+free+' '+plural(free,'gorra gratis','gorras gratis'), units, free, amountC:sumC(L) });
+      promos.push({ promo:'C', brand, label:'PROMO C · '+brand+' · '+free+' '+plural(free,cWord(brand)[0]+' gratis',cWord(brand)[1]+' gratis'), units, free, amountC:sumC(L) });
       const need = 15 - (units % 15);
-      hints.push({ promo:'C', brand, text:'PROMO C · '+brand+': añade '+need+' '+plural(need,'gorra','gorras')+' más de '+brand+' para otras 3 gratis.' });
+      hints.push({ promo:'C', brand, text:'PROMO C · '+brand+': añade '+need+' '+plural(need,cWord(brand)[0],cWord(brand)[1])+' más de '+brand+' para otras 3 gratis.' });
     }else{
       const need = 15 - units;
-      pending.push({ promo:'C', brand, need, text:'PROMO C · '+brand+': llevas '+units+' '+plural(units,'gorra','gorras')+'. Añade '+need+' '+plural(need,'gorra','gorras')+' más de '+brand+' para recibir 3 gratis (las 3 más baratas; no se pueden mezclar marcas).' });
+      pending.push({ promo:'C', brand, need, text:'PROMO C · '+brand+': llevas '+units+' '+plural(units,cWord(brand)[0],cWord(brand)[1])+'. Añade '+need+' '+plural(need,cWord(brand)[0],cWord(brand)[1])+' más de '+brand+' para recibir 3 gratis (las 3 más baratas; no se pueden mezclar marcas).' });
     }
   });
 
@@ -715,7 +716,7 @@ function calcPromos(cartObj){
 
 function promoNote(l){
   if(l.pct > 0) return '-' + l.pct + '% ' + SEG_LABEL.A;
-  if(l.promo === 'C' && l.freeUnits > 0) return l.freeUnits + ' ' + plural(l.freeUnits,'gorra gratis','gorras gratis');
+  if(l.promo === 'C' && l.freeUnits > 0) return l.freeUnits + ' ' + plural(l.freeUnits,cWord(l.it.brand)[0]+' gratis',cWord(l.it.brand)[1]+' gratis');
   if(l.freeBoxes > 0) return l.freeBoxes + ' ' + plural(l.freeBoxes,'caja gratis','cajas gratis');
   return '';
 }
@@ -751,7 +752,7 @@ async function loadCatalog(){
       sku: r.sku, code: r.code, brand: r.brand, gender: r.gender,
       unitPrice: Number(r.unit_price), boxQty: Number(r.box_qty) || 1,
       stockBoxes: Number(r.stock_boxes), img: r.img, link: r.link,
-      promo: PROMO_BRANDS[r.brand] || null
+      promo: r.promo_override || PROMO_BRANDS[r.brand] || null
     }));
     CAT_BY_SKU = {};
     CATALOG.forEach(it => CAT_BY_SKU[it.sku] = it);
@@ -1025,10 +1026,10 @@ function promoDetailHTML(calc){
       const paid = L.filter(l => !(l.freeBoxes > 0));
       if(paid.length) h += `<div class="pd-sub">Sin cajas gratis: ${paid.map(l => esc(itemName(l.it)) + ' (' + l.qty + ')').join(', ')}</div>`;
     }else{
-      h += `<div class="pd-h">PROMO C · ${esc(p.brand)} · ${p.free} ${plural(p.free,'gorra gratis','gorras gratis')}<small>${p.units} gorras de ${esc(p.brand)} · las gratis son las más baratas</small></div>`;
-      L.filter(l => l.freeUnits > 0).forEach(l => { h += row(itemName(l.it), `${l.freeUnits} de ${l.qty*l.it.boxQty} ${plural(l.qty*l.it.boxQty,'gorra','gorras')} gratis × ${money(l.unitMicro/10000)}`, '−' + money(l.discC/100), true); });
+      h += `<div class="pd-h">PROMO C · ${esc(p.brand)} · ${p.free} ${plural(p.free,cWord(p.brand)[0]+' gratis',cWord(p.brand)[1]+' gratis')}<small>${p.units} ${cWord(p.brand)[1]} de ${esc(p.brand)} · las gratis son las más baratas</small></div>`;
+      L.filter(l => l.freeUnits > 0).forEach(l => { h += row(itemName(l.it), `${l.freeUnits} de ${l.qty*l.it.boxQty} ${plural(l.qty*l.it.boxQty,cWord(l.it.brand)[0],cWord(l.it.brand)[1])} gratis × ${money(l.unitMicro/10000)}`, '−' + money(l.discC/100), true); });
       const paid = L.filter(l => !(l.freeUnits > 0));
-      if(paid.length) h += `<div class="pd-sub">Sin gorras gratis: ${paid.map(l => esc(itemName(l.it)) + ' (' + l.qty*l.it.boxQty + ')').join(', ')}</div>`;
+      if(paid.length) h += `<div class="pd-sub">Sin ${cWord(p.brand)[1]} gratis: ${paid.map(l => esc(itemName(l.it)) + ' (' + l.qty*l.it.boxQty + ')').join(', ')}</div>`;
     }
     h += `<div class="pd-tot"><span>Ahorro ${SEG_LABEL[p.promo]}${p.promo==='C'?' · '+esc(p.brand):''}</span><span>−${money(p.amountC/100)}</span></div>`;
   });
@@ -1085,9 +1086,9 @@ function renderCart(){
 function openPromoInfo(){
   const li = (title, text, brands) => `<li><b>${title}</b><br>${text}<span class="brands">${brands}</span></li>`;
   document.getElementById('promoRules').innerHTML =
-    li('PROMO A', '5 cajas → 10% de descuento<br>10 cajas → 15% de descuento<br>20 cajas → 20% de descuento<br>Las cajas se suman entre todas las marcas del segmento.', esc(brandsOfPromo('A').join(' · '))) +
+    li('PROMO A', '5 cajas → 10% de descuento<br>10 cajas → 15% de descuento<br>20 cajas → 20% de descuento<br>Las cajas se suman entre todas las marcas del segmento.', esc(brandsOfPromo('A').map(b=>b==='EVERLAST'?'EVERLAST (calzado)':b).join(' · '))) +
     li('PROMO B', '10 cajas → 1 gratis · 20 cajas → 3 gratis · 30 cajas → 6 gratis<br>Por cada 100 cajas → 25 gratis<br>Las gratis son las de menor valor. Se suman las cajas de todas las marcas del segmento.', esc(brandsOfPromo('B').join(' · '))) +
-    li('PROMO C', 'Por cada 15 gorras → las 3 más baratas son gratis (30 gorras = 6 gratis).<br>Cada marca se cuenta por separado: 15 GOORIN BROS + 15 NEW ERA = 3 gratis en cada una. No se pueden mezclar marcas.', esc(brandsOfPromo('C').join(' · ')));
+    li('PROMO C', 'Por cada 15 gorras → las 3 más baratas son gratis (30 gorras = 6 gratis).<br>Cada marca se cuenta por separado: 15 GOORIN BROS + 15 NEW ERA = 3 gratis en cada una. No se pueden mezclar marcas. En EVERLAST aplica solo a los accesorios (las 3 más baratas).', esc(brandsOfPromo('C').concat(['EVERLAST (solo accesorios)']).join(' · ')));
   document.getElementById('promoInfoModal').classList.add('open');
 }
 function closePromoInfo(){ document.getElementById('promoInfoModal').classList.remove('open'); }
@@ -1213,7 +1214,7 @@ async function submitCheckout(e){
 
 function orderItemNote(it){
   if(Number(it.promo_pct) > 0) return '−' + it.promo_pct + '% ' + SEG_LABEL.A;
-  if(Number(it.free_units) > 0) return it.free_units + ' ' + plural(Number(it.free_units),'gorra gratis','gorras gratis');
+  if(Number(it.free_units) > 0) return it.free_units + ' ' + plural(Number(it.free_units),cWord(it.brand)[0]+' gratis',cWord(it.brand)[1]+' gratis');
   if(Number(it.free_boxes) > 0) return it.free_boxes + ' ' + plural(Number(it.free_boxes),'caja gratis','cajas gratis');
   return '';
 }
