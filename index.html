@@ -6,7 +6,7 @@
 <title>Catálogo Mayorista — Kenman, SA | Dimarin</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@75..100,500..800&family=Public+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/exceljs@4.4.0/dist/exceljs.min.js"></script>
@@ -427,6 +427,98 @@ body[data-dens="2"] .media-stock{font-size:7.5px;padding:2px 5px;left:5px;bottom
 .hero-orn i:last-child{background:linear-gradient(270deg,transparent,var(--gold));}
 @media(max-width:600px){.hero{padding:30px 16px 28px;}.hero h1{font-size:30px;}.hero-eyebrow{font-size:10px;letter-spacing:.32em;}.logo-card img{height:34px;}}
 
+/* ================= REDISEÑO: catálogo de distribuidor ================= */
+:root{
+  --gold:#1f3fb4; --gold-light:#6f87e0;
+  --dark:#1a1c20; --dark2:#23262b; --dark3:#2d3036;
+  --cream:#e8eaec; --ink:#1a1c20; --muted:#6a707a; --line:#d3d7db;
+  --kraft:#d8b98c; --kraft-ink:#5a4220;
+}
+body{font-family:'Public Sans','Segoe UI',Arial,sans-serif;background:var(--cream);color:var(--ink);}
+h1,h2,h3,.card .code,.unit-net,.box-net{font-family:'Archivo','Arial Narrow',Arial,sans-serif;font-stretch:90%;}
+.btn{border-radius:4px;font-weight:600;letter-spacing:.1px;}
+.btn-gold{color:#fff;}
+.btn-outline{border-color:#b9bec4;}
+.btn-outline:hover{background:#fff;border-color:var(--ink);}
+
+/* Encabezado: una barra compacta, no un banner */
+.hero{background:#fff;color:var(--ink);padding:14px 22px;text-align:left;border-bottom:1px solid var(--line);overflow:visible;}
+.hero::before,.hero::after{display:none;}
+.hero-inner{max-width:none;margin:0;display:flex;align-items:center;gap:18px;}
+.logo-card{background:none;border:0;box-shadow:none;padding:0;margin:0;border-radius:0;}
+.logo-card img{height:34px;}
+.hero-eyebrow,.hero-orn{display:none;}
+.hero h1{font-size:21px;font-weight:700;letter-spacing:0;margin:0;padding-left:18px;border-left:1px solid var(--line);
+  background:none;-webkit-background-clip:initial;background-clip:initial;color:var(--ink);filter:none;line-height:1;}
+
+/* Barra de filtros */
+.toolbar{background:#fff;border-bottom:1px solid var(--line);box-shadow:none;}
+.toolbar #fSearch,.toolbar select,.ms-btn{border-radius:4px !important;border-color:#c5cad0 !important;}
+.toolbar #fSearch:focus{border-color:var(--ink);box-shadow:0 0 0 2px rgba(31,63,180,.18);}
+#cartBadge{background:#fff;color:var(--ink);border-radius:3px;}
+
+/* Grupos por marca */
+.brand-section h2{font-size:24px;font-weight:800;letter-spacing:0;text-transform:none;color:var(--ink);border-bottom:2px solid var(--ink);padding-bottom:6px;}
+.brand-section h2 span{font-family:'Public Sans',sans-serif;color:var(--muted) !important;}
+
+/* Tarjetas: ficha de producto */
+.card{border:1px solid var(--line);border-radius:3px;box-shadow:none;background:#fff;transition:border-color .15s;}
+.card:hover{box-shadow:none;transform:none;border-color:var(--ink);}
+.card-media{background:#f3f4f5;aspect-ratio:1/1;}
+.card-media img{mix-blend-mode:multiply;padding:6%;}
+.card:hover .card-media img{transform:none;}
+.card .card-body{background:#fff;border-top:1px solid var(--line);padding:12px 14px 14px;}
+.media-tag{border-radius:2px;box-shadow:none;letter-spacing:.2px;text-transform:none;font-size:11px;font-weight:700;top:0;left:0;padding:5px 9px;}
+.chip-promo.A{background:#1a1c20;color:#fff;}
+.chip-promo.B{background:#1f3fb4;color:#fff;}
+.chip-promo.C{background:#1f6b3a;color:#fff;}
+.media-stock{left:0;bottom:0;border-radius:0;font-size:11px;padding:4px 9px;font-weight:600;background:#fff;border-top:1px solid var(--line);border-right:1px solid var(--line);}
+.stock-ok{color:#1f6b3a;} .stock-low{color:#a3380f;}
+.card .code{font-size:15px;font-weight:700;letter-spacing:0;color:var(--ink);}
+.card .brand{font-size:12px;font-weight:600;letter-spacing:0;color:var(--muted);text-transform:none;}
+.card .sku{color:#8b919a;font-variant-numeric:tabular-nums;}
+.card .price-unit .unit-net{font-size:21px;font-weight:800;font-variant-numeric:tabular-nums;letter-spacing:-.2px;}
+.card .price-unit .unit-label{color:var(--muted);letter-spacing:0;text-transform:none;font-size:10.5px;font-weight:500;}
+.chip-gender{background:none;border:1px solid #c5cad0;color:#40454d;border-radius:2px;}
+.chip-pres{background:var(--kraft);color:var(--kraft-ink);border:1px dashed #a88454;border-radius:2px;font-weight:600;}
+.card .price-box{border-top:1px solid var(--line);}
+.card .price-box .box-label{color:var(--muted);font-size:11.5px;}
+.card .price-box .box-net{font-size:15px;font-weight:700;color:var(--ink);font-variant-numeric:tabular-nums;}
+.card .btn-add{background:var(--ink);color:#fff;border:0;border-radius:3px;text-transform:none;letter-spacing:0;font-size:13px;font-weight:600;padding:10px;}
+.card .btn-add:hover:not(:disabled){background:var(--gold);color:#fff;}
+body[data-dens="1"] .card .btn-add,body[data-dens="2"] .card .btn-add{font-size:11px;padding:8px 4px;}
+
+/* Ventanas y carrito */
+.modal{background:rgba(20,22,26,.55);}
+.modal .box{border-radius:6px;}
+#cartPanel{border-radius:0;}
+.ui-icon{border-radius:4px;}
+.toast{border-radius:3px;border-left-width:3px;}
+.orders-table th{text-transform:none;letter-spacing:0;font-size:12.5px;border-bottom:2px solid var(--ink);}
+.stat-pill,.confirm-icon{border-radius:4px;}
+@media(max-width:700px){
+  .hero{padding:10px 14px;} .logo-card img{height:28px;} .hero h1{font-size:17px;padding-left:12px;}
+  .brand-section h2{font-size:21px;}
+}
+
+/* barra de herramientas compacta en una sola fila */
+.toolbar-actions .btn{padding:8px 12px;font-size:13px;}
+.toolbar-actions{gap:6px;}
+.cols-ctl{border-radius:4px;}
+@media (min-width:860px){ .toolbar #fSearch{flex:1 1 180px;max-width:230px;} .toolbar-filters{flex-wrap:nowrap;} }
+.chip-promo{border-radius:2px !important;} .promo-box{border-radius:3px;}
+
+.modal .pdfopts-box{max-width:420px;width:calc(100% - 32px);padding:22px}
+.pdfopts-box h3{margin:0 0 4px;font-family:'Archivo',sans-serif;font-size:18px}
+.pdfopts-sub{margin:0 0 14px;color:#6b7076;font-size:13px}
+.pdfopts-list{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.pdfopt{display:flex;align-items:center;gap:8px;padding:9px 10px;border:1px solid var(--line);border-radius:4px;cursor:pointer;font-size:14px;background:#fff}
+.pdfopt:has(input:checked){border-color:var(--gold);background:#eef1fb}
+.pdfopt input{accent-color:var(--gold);width:16px;height:16px;margin:0}
+.pdfopts-quick{display:flex;gap:16px;margin:12px 0 4px}
+.pdfopts-quick .linkbtn{background:none;border:0;padding:0;color:var(--gold);font-size:13px;cursor:pointer;text-decoration:underline}
+@media(max-width:420px){.pdfopts-list{grid-template-columns:1fr}}
+
 </style>
 </head>
 <body>
@@ -448,7 +540,7 @@ body[data-dens="2"] .media-stock{font-size:7.5px;padding:2px 5px;left:5px;bottom
 
 <div class="toolbar">
   <input type="search" id="fSearch" class="search-input" placeholder="Buscar por SKU, código o marca…" autocomplete="off">
-  <button type="button" class="btn btn-outline filter-toggle-btn" onclick="toggleFilterPanel()">☰ Filtros <span class="fcount" id="filterBadge" hidden></span></button>
+  <button type="button" class="btn btn-outline filter-toggle-btn" onclick="toggleFilterPanel()">Filtros <span class="fcount" id="filterBadge" hidden></span></button>
   <div class="toolbar-filters" id="filterPanel">
     <div class="ms" id="ms_seg"></div>
     <div class="ms" id="ms_brand"></div>
@@ -462,12 +554,12 @@ body[data-dens="2"] .media-stock{font-size:7.5px;padding:2px 5px;left:5px;bottom
     <button type="button" class="btn btn-outline btn-sm" onclick="clearFilters()">Limpiar filtros</button>
   </div>
   <div class="toolbar-actions">
-    <div class="cols-ctl" title="Artículos por fila"><span class="lbl">▦ Por fila</span><button type="button" id="colsMinus" onclick="changeCols(-1)" aria-label="Menos columnas">−</button><span class="val" id="colsVal">5</span><button type="button" id="colsPlus" onclick="changeCols(1)" aria-label="Más columnas">+</button></div>
-    <button class="btn btn-outline" onclick="loadCatalog()" title="Actualizar catálogo">↻</button>
-    <button class="btn btn-outline" onclick="openOrders()">📋 Mis pedidos</button>
-    <button class="btn btn-outline" onclick="openPromoInfo()">🏷 Promociones</button>
-    <button class="btn btn-outline" id="btnCatalogPdf" onclick="exportCatalogPDF()" title="Descargar PDF de los artículos filtrados">📄 PDF</button>
-    <button class="btn btn-dark" onclick="toggleCart(true)">🛒 Carrito <span id="cartBadge">0</span></button>
+    <div class="cols-ctl" title="Artículos por fila"><span class="lbl">Por fila</span><button type="button" id="colsMinus" onclick="changeCols(-1)" aria-label="Menos columnas">−</button><span class="val" id="colsVal">5</span><button type="button" id="colsPlus" onclick="changeCols(1)" aria-label="Más columnas">+</button></div>
+    <button class="btn btn-outline" onclick="loadCatalog()" title="Actualizar catálogo">Actualizar</button>
+    <button class="btn btn-outline" onclick="openOrders()">Mis pedidos</button>
+    <button class="btn btn-outline" onclick="openPromoInfo()">Promociones</button>
+    <button class="btn btn-outline" id="btnCatalogPdf" onclick="exportCatalogPDF()" title="Descargar PDF de los artículos filtrados">PDF catálogo</button>
+    <button class="btn btn-dark" onclick="toggleCart(true)">Carrito <span id="cartBadge">0</span></button>
   </div>
 </div>
 <div class="active-bar" id="activeBar"></div>
@@ -527,13 +619,25 @@ body[data-dens="2"] .media-stock{font-size:7.5px;padding:2px 5px;left:5px;bottom
 <!-- MIS PEDIDOS -->
 <div class="modal" id="ordersModal">
   <div class="box orders-box">
-    <div class="orders-head"><h3>📋 Mis pedidos</h3><button type="button" class="btn btn-outline btn-sm" onclick="closeOrders()">Cerrar</button></div>
+    <div class="orders-head"><h3>Mis pedidos</h3><button type="button" class="btn btn-outline btn-sm" onclick="closeOrders()">Cerrar</button></div>
     <p class="hint">Todos los pedidos realizados. Descarga cada uno en PDF o Excel, igual al enviado por correo.</p>
     <div id="ordersBody"></div>
   </div>
 </div>
 
 <!-- DIÁLOGO Y AVISOS DE LA WEB -->
+<div class="modal" id="pdfOptsModal" style="z-index:850">
+  <div class="box pdfopts-box">
+    <h3>Datos a mostrar en el catálogo</h3>
+    <p class="pdfopts-sub" id="pdfOptsCount"></p>
+    <div class="pdfopts-list" id="pdfOptsList"></div>
+    <div class="pdfopts-quick"><button type="button" class="linkbtn" onclick="pdfOptsAll(true)">Marcar todo</button><button type="button" class="linkbtn" onclick="pdfOptsAll(false)">Quitar todo</button></div>
+    <div class="modal-actions">
+      <button class="btn btn-outline" onclick="closePdfOpts()">Cancelar</button>
+      <button class="btn btn-dark" onclick="confirmPdfOpts()">Descargar PDF</button>
+    </div>
+  </div>
+</div>
 <div class="modal ui-dialog" id="uiDialog" style="z-index:900">
   <div class="box ui-box">
     <div class="ui-icon" id="uiIcon">!</div>
@@ -585,12 +689,12 @@ body[data-dens="2"] .media-stock{font-size:7.5px;padding:2px 5px;left:5px;bottom
     <div class="confirm-meta" style="text-align:center;" id="confirmMeta"></div>
     <div class="confirm-items" id="confirmItems"></div>
     <div class="modal-actions">
-      <button class="btn btn-outline" onclick="generateOrderPDF(lastOrder)">📄 Descargar PDF</button>
-      <button class="btn btn-outline" onclick="generateOrderExcel(lastOrder)">📊 Descargar Excel</button>
+      <button class="btn btn-outline" onclick="generateOrderPDF(lastOrder)">Descargar PDF</button>
+      <button class="btn btn-outline" onclick="generateOrderExcel(lastOrder)">Descargar Excel</button>
     </div>
     <div class="modal-actions">
-      <button class="btn btn-whatsapp" onclick="shareOrderPDF(lastOrder)">📲 PDF por WhatsApp</button>
-      <button class="btn btn-whatsapp" onclick="shareOrderExcel(lastOrder)">📲 Excel por WhatsApp</button>
+      <button class="btn btn-whatsapp" onclick="shareOrderPDF(lastOrder)">PDF por WhatsApp</button>
+      <button class="btn btn-whatsapp" onclick="shareOrderExcel(lastOrder)">Excel por WhatsApp</button>
     </div>
     <div class="modal-actions">
       <button class="btn btn-dark" style="flex:1;" onclick="closeConfirm()">Cerrar</button>
@@ -933,7 +1037,7 @@ function openOrders(){
 }
 function showOrdersLogin(msg){
   document.getElementById('ordersBody').innerHTML =
-    '<form class="orders-login" onsubmit="submitOrdersLogin(event)"><div class="lock">🔒</div><p>Acceso restringido. Ingresa la contraseña para ver los pedidos.</p>' +
+    '<form class="orders-login" onsubmit="submitOrdersLogin(event)"><p>Acceso restringido. Ingresa la contraseña para ver los pedidos.</p>' +
     '<input type="password" id="ordersPin" placeholder="Contraseña" autocomplete="off" autofocus>' +
     (msg ? '<div class="orders-err">'+esc(msg)+'</div>' : '') +
     '<button type="submit" class="btn btn-dark" id="ordersPinBtn">Entrar</button></form>';
@@ -1332,10 +1436,10 @@ function renderCart(){
 
   let promoHtml = '';
   if(calc.pending.length){
-    promoHtml += `<div class="promo-box promo-warn"><span class="ttl">⚠ Promociones pendientes</span><ul>${calc.pending.map(p=>`<li>${esc(p.text)}</li>`).join('')}</ul></div>`;
+    promoHtml += `<div class="promo-box promo-warn"><span class="ttl">Promociones pendientes</span><ul>${calc.pending.map(p=>`<li>${esc(p.text)}</li>`).join('')}</ul></div>`;
   }
   if(calc.promos.length){
-    promoHtml += `<div class="promo-box promo-ok"><span class="ttl">✓ Promociones aplicadas</span><ul>${calc.promos.map(p=>`<li>${esc(p.label)} (−${money(p.amountC/100)})</li>`).join('')}</ul>` +
+    promoHtml += `<div class="promo-box promo-ok"><span class="ttl">Promociones aplicadas</span><ul>${calc.promos.map(p=>`<li>${esc(p.label)} (−${money(p.amountC/100)})</li>`).join('')}</ul>` +
       `<button type="button" class="pd-toggle" onclick="togglePromoDetail()">${PROMO_DETAIL_OPEN?'Ocultar detalle ▴':'Ver detalle ▾'}</button>` +
       (PROMO_DETAIL_OPEN ? promoDetailHTML(calc) : '') + `</div>`;
   }
@@ -1881,17 +1985,28 @@ function filterSummaryText(){
   if(SORT) parts.push('Orden: ' + SORT_LABEL[SORT]);
   return parts.join('  ·  ');
 }
-async function buildCatalogPDFDoc(items){
+const CATALOG_FIELD_DEFAULTS = { image:true, brand:true, code:true, sku:true, gender:true, unitPrice:true, boxPrice:false, boxQty:false, stock:true };
+const CATALOG_FIELD_LABELS = [
+  ['image','Imagen'],['brand','Marca'],['code','Código / modelo'],['sku','SKU'],['gender','Género'],
+  ['unitPrice','Precio unitario'],['boxPrice','Precio por caja'],['boxQty','Unidades por caja'],['stock','Existencia']
+];
+function loadCatalogFields(){
+  try{ const o = JSON.parse(localStorage.getItem('dimarin_pdf_fields')||'null'); if(o) return Object.assign({}, CATALOG_FIELD_DEFAULTS, o); }catch(e){}
+  return Object.assign({}, CATALOG_FIELD_DEFAULTS);
+}
+async function buildCatalogPDFDoc(items, opts){
+  opts = Object.assign({}, CATALOG_FIELD_DEFAULTS, opts||{});
   const { jsPDF } = window.jspdf;
   const doc = new jsPDF({ unit:'pt', format:'letter', orientation:'portrait' });
   const W = doc.internal.pageSize.getWidth(), H = doc.internal.pageSize.getHeight();
   const mx = 36, gap = 12;
-  const cellW = (W - 2*mx - gap) / 2, cellH = 208, gapY = 8;
+  const cellW = (W - 2*mx - gap) / 2, cellH = 214, gapY = 8;
   const top = 100;
   const perPage = 6;
   const pages = Math.ceil(items.length / perPage);
   const dateStr = new Date().toLocaleDateString('es-NI', { day:'2-digit', month:'long', year:'numeric' });
   const sumText = filterSummaryText();
+  const stampStr = new Date().toLocaleString('es-NI', { day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit' });
   let logoDims = { w:120, h:30 };
   try{ const p = doc.getImageProperties(LOGO_DATA_URL); const h = 34; logoDims = { w: h * p.width / p.height, h }; }catch(e){}
 
@@ -1902,7 +2017,7 @@ async function buildCatalogPDFDoc(items){
     while(!EXPORT_CANCELLED){
       const i = next++;
       if(i >= items.length) return;
-      assets[i] = items[i].img ? await fetchImageAsset(items[i].img, { maxPx:720, quality:0.84 }) : null;
+      assets[i] = (opts.image && items[i].img) ? await fetchImageAsset(items[i].img, { maxPx:720, quality:0.84 }) : null;
       done++; updateExportProgress(done, items.length);
     }
   }
@@ -1924,7 +2039,7 @@ async function buildCatalogPDFDoc(items){
   }
   function footer(p){
     doc.setFont('helvetica','normal'); doc.setFontSize(7.5); doc.setTextColor(140);
-    doc.text('Kenman, SA · Dimarin — Precios B2B en U$ por unidad. Sujetos a disponibilidad.', mx, H - 24);
+    doc.text('Kenman, SA · Dimarin — Precios B2B en U$ por unidad. Existencias al ' + stampStr + '; sujetas a cambio.', mx, H - 24);
     doc.text('Página ' + p + ' de ' + pages, W - mx, H - 24, { align:'right' });
   }
   const trunc = (s, w, size, style) => {
@@ -1943,46 +2058,84 @@ async function buildCatalogPDFDoc(items){
       const cy = top + Math.floor(k/2)*(cellH + gapY);
       doc.setDrawColor(228); doc.setLineWidth(.6);
       doc.roundedRect(cx, cy, cellW, cellH, 4, 4);
-      const box = 124, ix = cx + (cellW - box)/2, iy = cy + 8;
-      if(a){
-        const s = Math.min(box/a.w, box/a.h), dw = a.w*s, dh = a.h*s;
-        try{ doc.addImage(a.dataUrl, a.ext.toUpperCase()==='PNG'?'PNG':'JPEG', ix + (box-dw)/2, iy + (box-dh)/2, dw, dh); }catch(e){}
-      }else{
-        doc.setDrawColor(235); doc.rect(ix, iy, box, box);
-        doc.setFontSize(8); doc.setTextColor(170); doc.text('Sin imagen', cx + cellW/2, iy + box/2, { align:'center' });
-      }
       const tx = cx + cellW/2, tw = cellW - 20;
-      let ty = iy + box + 14;
-      doc.setTextColor(20); doc.text(trunc(it.brand, tw, 10, 'bold'), tx, ty, { align:'center' });
-      ty += 12;
-      doc.setTextColor(60); doc.text(trunc(it.code || '', tw, 8.5, 'normal'), tx, ty, { align:'center' });
-      ty += 11;
-      doc.setTextColor(120);
-      doc.text(trunc('SKU ' + it.sku + (it.gender ? '  ·  ' + it.gender : ''), tw, 8, 'normal'), tx, ty, { align:'center' });
-      ty += 19;
-      doc.setFont('helvetica','bold'); doc.setFontSize(15); doc.setTextColor(20);
-      doc.text(money(it.unitPrice), tx, ty, { align:'center' });
-      doc.setFont('helvetica','normal'); doc.setFontSize(7); doc.setTextColor(140);
-      doc.text('PRECIO UNIT.', tx, ty + 9, { align:'center' });
+      const uds = it.stockBoxes * (it.boxQty || 1);
+      const bq = it.boxQty || 1;
+      // Líneas de texto según campos elegidos
+      const L = [];
+      if(opts.brand && it.brand) L.push({ h:12, f:()=>{ doc.setTextColor(20); doc.text(trunc(it.brand, tw, 10, 'bold'), tx, L.y, { align:'center' }); } });
+      if(opts.code && it.code) L.push({ h:11, f:()=>{ doc.setTextColor(60); doc.text(trunc(it.code, tw, 8.5, 'normal'), tx, L.y, { align:'center' }); } });
+      const skuTxt = [opts.sku ? 'SKU ' + it.sku : '', opts.gender ? (it.gender||'') : ''].filter(Boolean).join('  ·  ');
+      if(skuTxt) L.push({ h:11, f:()=>{ doc.setTextColor(120); doc.text(trunc(skuTxt, tw, 8, 'normal'), tx, L.y, { align:'center' }); } });
+      if(opts.unitPrice) L.push({ h:30, f:()=>{
+        doc.setFont('helvetica','bold'); doc.setFontSize(15); doc.setTextColor(20);
+        doc.text(money(it.unitPrice), tx, L.y + 8, { align:'center' });
+        doc.setFont('helvetica','normal'); doc.setFontSize(7); doc.setTextColor(140);
+        doc.text('PRECIO UNIT.', tx, L.y + 17, { align:'center' }); } });
+      if(opts.boxPrice) L.push({ h:12, f:()=>{
+        doc.setFont('helvetica','bold'); doc.setFontSize(9); doc.setTextColor(20);
+        doc.text('Caja: ' + money(it.unitPrice * bq), tx, L.y, { align:'center' }); } });
+      if(opts.boxQty) L.push({ h:11, f:()=>{
+        doc.setFont('helvetica','normal'); doc.setFontSize(8); doc.setTextColor(90);
+        doc.text(bq > 1 ? 'Caja de ' + bq + ' unidades' : 'Venta por unidad', tx, L.y, { align:'center' }); } });
+      if(opts.stock) L.push({ h:14, f:()=>{
+        doc.setFont('helvetica','bold'); doc.setFontSize(8); doc.setTextColor(31,107,58);
+        doc.text('Existencia: ' + it.stockBoxes + (it.stockBoxes===1?' caja':' cajas') + '  ·  ' + uds + (uds===1?' unidad':' unidades'), tx, L.y, { align:'center' }); } });
+      const textH = L.reduce((n,l)=>n+l.h, 0);
+      let ty;
+      if(opts.image){
+        const box = Math.max(50, Math.min(120, cellH - 8 - 12 - textH - 6));
+        const ix = cx + (cellW - box)/2, iy = cy + 8;
+        if(a){
+          const sc = Math.min(box/a.w, box/a.h), dw = a.w*sc, dh = a.h*sc;
+          try{ doc.addImage(a.dataUrl, a.ext.toUpperCase()==='PNG'?'PNG':'JPEG', ix + (box-dw)/2, iy + (box-dh)/2, dw, dh); }catch(e){}
+        }else{
+          doc.setDrawColor(235); doc.rect(ix, iy, box, box);
+          doc.setFontSize(8); doc.setTextColor(170); doc.text('Sin imagen', cx + cellW/2, iy + box/2, { align:'center' });
+        }
+        ty = iy + box + 12;
+      }else{
+        ty = cy + Math.max(14, (cellH - textH)/2 + 8);
+      }
+      L.y = ty;
+      L.forEach(l=>{ l.f(); L.y += l.h; });
     }
   }
   return doc;
 }
-async function exportCatalogPDF(){
+function exportCatalogPDF(){
+  const items = getFiltered();
+  if(!items.length){ notify('No hay artículos en la selección actual para exportar.','warn'); return; }
+  const cur = loadCatalogFields();
+  document.getElementById('pdfOptsList').innerHTML = CATALOG_FIELD_LABELS.map(([k,l]) =>
+    '<label class="pdfopt"><input type="checkbox" data-k="'+k+'"'+(cur[k]?' checked':'')+'><span>'+l+'</span></label>').join('');
+  document.getElementById('pdfOptsCount').textContent = items.length + (items.length===1?' artículo':' artículos') + ' en la selección actual';
+  document.getElementById('pdfOptsModal').classList.add('open');
+}
+function closePdfOpts(){ document.getElementById('pdfOptsModal').classList.remove('open'); }
+function pdfOptsAll(v){ document.querySelectorAll('#pdfOptsList input').forEach(i=>{ i.checked = v; }); }
+async function confirmPdfOpts(){
+  const opts = {};
+  document.querySelectorAll('#pdfOptsList input').forEach(i=>{ opts[i.dataset.k] = i.checked; });
+  if(!Object.values(opts).some(Boolean)){ notify('Elige al menos un dato para mostrar.','warn'); return; }
+  try{ localStorage.setItem('dimarin_pdf_fields', JSON.stringify(opts)); }catch(e){}
+  closePdfOpts();
+  await runCatalogPDF(opts);
+}
+async function runCatalogPDF(opts){
   const items = getFiltered();
   if(!items.length){ notify('No hay artículos en la selección actual para exportar.','warn'); return; }
   if(items.length > 300 && !(await uiConfirm('Vas a exportar ' + items.length + ' artículos (' + Math.ceil(items.length/6) + ' páginas). Puede tardar un poco. ¿Continuar?'))) return;
   showExportModal('Generando catálogo PDF…', true);
   updateExportProgress(0, items.length);
   try{
-    const doc = await buildCatalogPDFDoc(items);
+    const doc = await buildCatalogPDFDoc(items, opts);
     if(doc) doc.save('catalogo-dimarin-' + new Date().toISOString().slice(0,10) + '.pdf');
   }catch(err){
     console.error(err);
     notify('Ocurrió un error al generar el catálogo PDF.','error');
   }finally{ hideExportModal(); }
 }
-
 /* ---------- EMAIL NOTIFICATION (background, silent) ---------- */
 async function sendOrderEmailInBackground(order){
   try{
