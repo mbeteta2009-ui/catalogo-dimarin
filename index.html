@@ -6,7 +6,7 @@
 <title>Catálogo Mayorista — Kenman, SA | Dimarin</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@75..100,500..800&family=Public+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/exceljs@4.4.0/dist/exceljs.min.js"></script>
@@ -237,7 +237,7 @@ footer{padding:34px 22px;text-align:center;color:var(--muted);font-size:12px;bac
 .ms-btn.has{border-color:var(--gold);background:#fffaf0;}
 .ms-btn .n{background:var(--gold);color:#171412;border-radius:10px;font-size:11px;font-weight:800;padding:1px 7px;margin-left:4px;}
 .ms-btn .car{font-size:10px;color:#999;}
-.ms-panel{display:none;position:absolute;z-index:70;top:calc(100% + 6px);left:0;min-width:250px;max-height:340px;overflow-y:auto;background:#fff;border:1px solid var(--line);border-radius:10px;box-shadow:0 14px 34px rgba(0,0,0,.16);padding:6px;}
+.ms-panel{display:none;position:absolute;z-index:70;top:calc(100% + 6px);left:0;min-width:250px;max-height:340px;overflow-y:auto;background:#fff;border:1px solid #e3d9c3;border-radius:10px;box-shadow:0 14px 34px rgba(0,0,0,.16);padding:6px;}
 .ms.open .ms-panel{display:block;}
 .ms-opt{display:flex;align-items:center;gap:9px;padding:8px 10px;border-radius:7px;font-size:13px;cursor:pointer;user-select:none;}
 .ms-opt:hover{background:#faf7ee;}
@@ -289,7 +289,7 @@ footer{padding:34px 22px;text-align:center;color:var(--muted);font-size:12px;bac
 
 /* Columnas ajustables */
 .grid{grid-template-columns:repeat(var(--cols,5),minmax(0,1fr));}
-.cols-ctl{display:inline-flex;align-items:center;gap:2px;border:1px solid var(--line);border-radius:10px;background:#fff;padding:2px;}
+.cols-ctl{display:inline-flex;align-items:center;gap:2px;border:1px solid #e3d9c3;border-radius:10px;background:#fff;padding:2px;}
 .cols-ctl .lbl{font-size:12px;color:var(--muted);padding:0 4px 0 8px;white-space:nowrap;}
 .cols-ctl button{width:30px;height:30px;border:none;background:transparent;border-radius:8px;font-size:17px;font-weight:700;cursor:pointer;color:var(--dark);}
 .cols-ctl button:hover:not(:disabled){background:#f1eee6;}
@@ -427,93 +427,12 @@ body[data-dens="2"] .media-stock{font-size:7.5px;padding:2px 5px;left:5px;bottom
 .hero-orn i:last-child{background:linear-gradient(270deg,transparent,var(--gold));}
 @media(max-width:600px){.hero{padding:30px 16px 28px;}.hero h1{font-size:30px;}.hero-eyebrow{font-size:10px;letter-spacing:.32em;}.logo-card img{height:34px;}}
 
-/* ================= REDISEÑO: catálogo de distribuidor ================= */
-:root{
-  --gold:#1f3fb4; --gold-light:#6f87e0;
-  --dark:#1a1c20; --dark2:#23262b; --dark3:#2d3036;
-  --cream:#e8eaec; --ink:#1a1c20; --muted:#6a707a; --line:#d3d7db;
-  --kraft:#d8b98c; --kraft-ink:#5a4220;
-}
-body{font-family:'Public Sans','Segoe UI',Arial,sans-serif;background:var(--cream);color:var(--ink);}
-h1,h2,h3,.card .code,.unit-net,.box-net{font-family:'Archivo','Arial Narrow',Arial,sans-serif;font-stretch:90%;}
-.btn{border-radius:4px;font-weight:600;letter-spacing:.1px;}
-.btn-gold{color:#fff;}
-.btn-outline{border-color:#b9bec4;}
-.btn-outline:hover{background:#fff;border-color:var(--ink);}
-
-/* Encabezado: una barra compacta, no un banner */
-.hero{background:#fff;color:var(--ink);padding:14px 22px;text-align:left;border-bottom:1px solid var(--line);overflow:visible;}
-.hero::before,.hero::after{display:none;}
-.hero-inner{max-width:none;margin:0;display:flex;align-items:center;gap:18px;}
-.logo-card{background:none;border:0;box-shadow:none;padding:0;margin:0;border-radius:0;}
-.logo-card img{height:34px;}
-.hero-eyebrow,.hero-orn{display:none;}
-.hero h1{font-size:21px;font-weight:700;letter-spacing:0;margin:0;padding-left:18px;border-left:1px solid var(--line);
-  background:none;-webkit-background-clip:initial;background-clip:initial;color:var(--ink);filter:none;line-height:1;}
-
-/* Barra de filtros */
-.toolbar{background:#fff;border-bottom:1px solid var(--line);box-shadow:none;}
-.toolbar #fSearch,.toolbar select,.ms-btn{border-radius:4px !important;border-color:#c5cad0 !important;}
-.toolbar #fSearch:focus{border-color:var(--ink);box-shadow:0 0 0 2px rgba(31,63,180,.18);}
-#cartBadge{background:#fff;color:var(--ink);border-radius:3px;}
-
-/* Grupos por marca */
-.brand-section h2{font-size:24px;font-weight:800;letter-spacing:0;text-transform:none;color:var(--ink);border-bottom:2px solid var(--ink);padding-bottom:6px;}
-.brand-section h2 span{font-family:'Public Sans',sans-serif;color:var(--muted) !important;}
-
-/* Tarjetas: ficha de producto */
-.card{border:1px solid var(--line);border-radius:3px;box-shadow:none;background:#fff;transition:border-color .15s;}
-.card:hover{box-shadow:none;transform:none;border-color:var(--ink);}
-.card-media{background:#f3f4f5;aspect-ratio:1/1;}
-.card-media img{mix-blend-mode:multiply;padding:6%;}
-.card:hover .card-media img{transform:none;}
-.card .card-body{background:#fff;border-top:1px solid var(--line);padding:12px 14px 14px;}
-.media-tag{border-radius:2px;box-shadow:none;letter-spacing:.2px;text-transform:none;font-size:11px;font-weight:700;top:0;left:0;padding:5px 9px;}
-.chip-promo.A{background:#1a1c20;color:#fff;}
-.chip-promo.B{background:#1f3fb4;color:#fff;}
-.chip-promo.C{background:#1f6b3a;color:#fff;}
-.media-stock{left:0;bottom:0;border-radius:0;font-size:11px;padding:4px 9px;font-weight:600;background:#fff;border-top:1px solid var(--line);border-right:1px solid var(--line);}
-.stock-ok{color:#1f6b3a;} .stock-low{color:#a3380f;}
-.card .code{font-size:15px;font-weight:700;letter-spacing:0;color:var(--ink);}
-.card .brand{font-size:12px;font-weight:600;letter-spacing:0;color:var(--muted);text-transform:none;}
-.card .sku{color:#8b919a;font-variant-numeric:tabular-nums;}
-.card .price-unit .unit-net{font-size:21px;font-weight:800;font-variant-numeric:tabular-nums;letter-spacing:-.2px;}
-.card .price-unit .unit-label{color:var(--muted);letter-spacing:0;text-transform:none;font-size:10.5px;font-weight:500;}
-.chip-gender{background:none;border:1px solid #c5cad0;color:#40454d;border-radius:2px;}
-.chip-pres{background:var(--kraft);color:var(--kraft-ink);border:1px dashed #a88454;border-radius:2px;font-weight:600;}
-.card .price-box{border-top:1px solid var(--line);}
-.card .price-box .box-label{color:var(--muted);font-size:11.5px;}
-.card .price-box .box-net{font-size:15px;font-weight:700;color:var(--ink);font-variant-numeric:tabular-nums;}
-.card .btn-add{background:var(--ink);color:#fff;border:0;border-radius:3px;text-transform:none;letter-spacing:0;font-size:13px;font-weight:600;padding:10px;}
-.card .btn-add:hover:not(:disabled){background:var(--gold);color:#fff;}
-body[data-dens="1"] .card .btn-add,body[data-dens="2"] .card .btn-add{font-size:11px;padding:8px 4px;}
-
-/* Ventanas y carrito */
-.modal{background:rgba(20,22,26,.55);}
-.modal .box{border-radius:6px;}
-#cartPanel{border-radius:0;}
-.ui-icon{border-radius:4px;}
-.toast{border-radius:3px;border-left-width:3px;}
-.orders-table th{text-transform:none;letter-spacing:0;font-size:12.5px;border-bottom:2px solid var(--ink);}
-.stat-pill,.confirm-icon{border-radius:4px;}
-@media(max-width:700px){
-  .hero{padding:10px 14px;} .logo-card img{height:28px;} .hero h1{font-size:17px;padding-left:12px;}
-  .brand-section h2{font-size:21px;}
-}
-
-/* barra de herramientas compacta en una sola fila */
-.toolbar-actions .btn{padding:8px 12px;font-size:13px;}
-.toolbar-actions{gap:6px;}
-.cols-ctl{border-radius:4px;}
-@media (min-width:860px){ .toolbar #fSearch{flex:1 1 180px;max-width:230px;} .toolbar-filters{flex-wrap:nowrap;} }
-.chip-promo{border-radius:2px !important;} .promo-box{border-radius:3px;}
-
 .modal .pdfopts-box{max-width:420px;width:calc(100% - 32px);padding:22px}
-.pdfopts-box h3{margin:0 0 4px;font-family:'Archivo',sans-serif;font-size:18px}
+.pdfopts-box h3{margin:0 0 4px;font-size:18px}
 .pdfopts-sub{margin:0 0 14px;color:#6b7076;font-size:13px}
 .pdfopts-list{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-.pdfopt{display:flex;align-items:center;gap:8px;padding:9px 10px;border:1px solid var(--line);border-radius:4px;cursor:pointer;font-size:14px;background:#fff}
-.pdfopt:has(input:checked){border-color:var(--gold);background:#eef1fb}
+.pdfopt{display:flex;align-items:center;gap:8px;padding:9px 10px;border:1px solid #e3d9c3;border-radius:4px;cursor:pointer;font-size:14px;background:#fff}
+.pdfopt:has(input:checked){border-color:var(--gold);background:#fbf4e1}
 .pdfopt input{accent-color:var(--gold);width:16px;height:16px;margin:0}
 .pdfopts-quick{display:flex;gap:16px;margin:12px 0 4px}
 .pdfopts-quick .linkbtn{background:none;border:0;padding:0;color:var(--gold);font-size:13px;cursor:pointer;text-decoration:underline}
@@ -540,7 +459,7 @@ body[data-dens="1"] .card .btn-add,body[data-dens="2"] .card .btn-add{font-size:
 
 <div class="toolbar">
   <input type="search" id="fSearch" class="search-input" placeholder="Buscar por SKU, código o marca…" autocomplete="off">
-  <button type="button" class="btn btn-outline filter-toggle-btn" onclick="toggleFilterPanel()">Filtros <span class="fcount" id="filterBadge" hidden></span></button>
+  <button type="button" class="btn btn-outline filter-toggle-btn" onclick="toggleFilterPanel()">☰ Filtros <span class="fcount" id="filterBadge" hidden></span></button>
   <div class="toolbar-filters" id="filterPanel">
     <div class="ms" id="ms_seg"></div>
     <div class="ms" id="ms_brand"></div>
@@ -554,12 +473,12 @@ body[data-dens="1"] .card .btn-add,body[data-dens="2"] .card .btn-add{font-size:
     <button type="button" class="btn btn-outline btn-sm" onclick="clearFilters()">Limpiar filtros</button>
   </div>
   <div class="toolbar-actions">
-    <div class="cols-ctl" title="Artículos por fila"><span class="lbl">Por fila</span><button type="button" id="colsMinus" onclick="changeCols(-1)" aria-label="Menos columnas">−</button><span class="val" id="colsVal">5</span><button type="button" id="colsPlus" onclick="changeCols(1)" aria-label="Más columnas">+</button></div>
-    <button class="btn btn-outline" onclick="loadCatalog()" title="Actualizar catálogo">Actualizar</button>
-    <button class="btn btn-outline" onclick="openOrders()">Mis pedidos</button>
-    <button class="btn btn-outline" onclick="openPromoInfo()">Promociones</button>
-    <button class="btn btn-outline" id="btnCatalogPdf" onclick="exportCatalogPDF()" title="Descargar PDF de los artículos filtrados">PDF catálogo</button>
-    <button class="btn btn-dark" onclick="toggleCart(true)">Carrito <span id="cartBadge">0</span></button>
+    <div class="cols-ctl" title="Artículos por fila"><span class="lbl">▦ Por fila</span><button type="button" id="colsMinus" onclick="changeCols(-1)" aria-label="Menos columnas">−</button><span class="val" id="colsVal">5</span><button type="button" id="colsPlus" onclick="changeCols(1)" aria-label="Más columnas">+</button></div>
+    <button class="btn btn-outline" onclick="loadCatalog()" title="Actualizar catálogo">↻</button>
+    <button class="btn btn-outline" onclick="openOrders()">📋 Mis pedidos</button>
+    <button class="btn btn-outline" onclick="openPromoInfo()">🏷 Promociones</button>
+    <button class="btn btn-outline" id="btnCatalogPdf" onclick="exportCatalogPDF()" title="Descargar PDF de los artículos filtrados">📄 PDF</button>
+    <button class="btn btn-dark" onclick="toggleCart(true)">🛒 Carrito <span id="cartBadge">0</span></button>
   </div>
 </div>
 <div class="active-bar" id="activeBar"></div>
@@ -619,7 +538,7 @@ body[data-dens="1"] .card .btn-add,body[data-dens="2"] .card .btn-add{font-size:
 <!-- MIS PEDIDOS -->
 <div class="modal" id="ordersModal">
   <div class="box orders-box">
-    <div class="orders-head"><h3>Mis pedidos</h3><button type="button" class="btn btn-outline btn-sm" onclick="closeOrders()">Cerrar</button></div>
+    <div class="orders-head"><h3>📋 Mis pedidos</h3><button type="button" class="btn btn-outline btn-sm" onclick="closeOrders()">Cerrar</button></div>
     <p class="hint">Todos los pedidos realizados. Descarga cada uno en PDF o Excel, igual al enviado por correo.</p>
     <div id="ordersBody"></div>
   </div>
@@ -689,12 +608,12 @@ body[data-dens="1"] .card .btn-add,body[data-dens="2"] .card .btn-add{font-size:
     <div class="confirm-meta" style="text-align:center;" id="confirmMeta"></div>
     <div class="confirm-items" id="confirmItems"></div>
     <div class="modal-actions">
-      <button class="btn btn-outline" onclick="generateOrderPDF(lastOrder)">Descargar PDF</button>
-      <button class="btn btn-outline" onclick="generateOrderExcel(lastOrder)">Descargar Excel</button>
+      <button class="btn btn-outline" onclick="generateOrderPDF(lastOrder)">📄 Descargar PDF</button>
+      <button class="btn btn-outline" onclick="generateOrderExcel(lastOrder)">📊 Descargar Excel</button>
     </div>
     <div class="modal-actions">
-      <button class="btn btn-whatsapp" onclick="shareOrderPDF(lastOrder)">PDF por WhatsApp</button>
-      <button class="btn btn-whatsapp" onclick="shareOrderExcel(lastOrder)">Excel por WhatsApp</button>
+      <button class="btn btn-whatsapp" onclick="shareOrderPDF(lastOrder)">📲 PDF por WhatsApp</button>
+      <button class="btn btn-whatsapp" onclick="shareOrderExcel(lastOrder)">📲 Excel por WhatsApp</button>
     </div>
     <div class="modal-actions">
       <button class="btn btn-dark" style="flex:1;" onclick="closeConfirm()">Cerrar</button>
@@ -1037,7 +956,7 @@ function openOrders(){
 }
 function showOrdersLogin(msg){
   document.getElementById('ordersBody').innerHTML =
-    '<form class="orders-login" onsubmit="submitOrdersLogin(event)"><p>Acceso restringido. Ingresa la contraseña para ver los pedidos.</p>' +
+    '<form class="orders-login" onsubmit="submitOrdersLogin(event)"><div class="lock">🔒</div><p>Acceso restringido. Ingresa la contraseña para ver los pedidos.</p>' +
     '<input type="password" id="ordersPin" placeholder="Contraseña" autocomplete="off" autofocus>' +
     (msg ? '<div class="orders-err">'+esc(msg)+'</div>' : '') +
     '<button type="submit" class="btn btn-dark" id="ordersPinBtn">Entrar</button></form>';
@@ -1436,10 +1355,10 @@ function renderCart(){
 
   let promoHtml = '';
   if(calc.pending.length){
-    promoHtml += `<div class="promo-box promo-warn"><span class="ttl">Promociones pendientes</span><ul>${calc.pending.map(p=>`<li>${esc(p.text)}</li>`).join('')}</ul></div>`;
+    promoHtml += `<div class="promo-box promo-warn"><span class="ttl">⚠ Promociones pendientes</span><ul>${calc.pending.map(p=>`<li>${esc(p.text)}</li>`).join('')}</ul></div>`;
   }
   if(calc.promos.length){
-    promoHtml += `<div class="promo-box promo-ok"><span class="ttl">Promociones aplicadas</span><ul>${calc.promos.map(p=>`<li>${esc(p.label)} (−${money(p.amountC/100)})</li>`).join('')}</ul>` +
+    promoHtml += `<div class="promo-box promo-ok"><span class="ttl">✓ Promociones aplicadas</span><ul>${calc.promos.map(p=>`<li>${esc(p.label)} (−${money(p.amountC/100)})</li>`).join('')}</ul>` +
       `<button type="button" class="pd-toggle" onclick="togglePromoDetail()">${PROMO_DETAIL_OPEN?'Ocultar detalle ▴':'Ver detalle ▾'}</button>` +
       (PROMO_DETAIL_OPEN ? promoDetailHTML(calc) : '') + `</div>`;
   }
