@@ -1056,8 +1056,9 @@ function matchSearch(it){
   return SEARCH.split(' ').every(t => b.includes(t));
 }
 function itemFacet(it, key){ return key==='seg' ? segKey(it) : (key==='brand' ? it.brand : it.gender); }
+function availBoxes(it){ return it.stockBoxes - (cart[it.sku]||0); }   // existencia menos lo ya agregado al carrito
 function passes(it, skipKey){
-  if(it.stockBoxes <= 0) return false;       // los agotados nunca se muestran
+  if(availBoxes(it) <= 0) return false;       // agotados (o todo en tu carrito) no se muestran
   if(!matchSearch(it)) return false;
   for(const k of ['seg','brand','gender']){
     if(k === skipKey) continue;
@@ -1168,8 +1169,9 @@ function cardHTML(it){
   const unit = it.unitPrice;
   const box = boxCents(it) / 100;
   const pres = it.boxQty > 1 ? ('Caja de ' + it.boxQty + ' unid.') : 'Unitario';
-  const stockClass = it.stockBoxes<=2 ? 'stock-low' : 'stock-ok';
-  const stockText = it.stockBoxes + ' caja' + (it.stockBoxes===1?'':'s') + ' disp.';
+  const av = availBoxes(it);
+  const stockClass = av<=2 ? 'stock-low' : 'stock-ok';
+  const stockText = av + ' caja' + (av===1?'':'s') + ' disp.';
   return `
   <article class="card" data-sku="${esc(it.sku)}">
     <div class="card-media" onclick="openLightbox('${esc(it.img)}')">
@@ -1253,7 +1255,7 @@ function addToCart(sku){
   const have = cart[sku] || 0;
   if(it.stockBoxes<=0){ notify('Producto agotado.','error'); return; }
   if(have+1 > it.stockBoxes){ notify('No hay suficiente stock disponible (stock actual: ' + it.stockBoxes + ' caja(s)).','error'); return; }
-  cart[sku] = have+1; saveCart(); renderCart(); updateCartBadge();
+  cart[sku] = have+1; saveCart(); renderCart(); updateCartBadge(); refreshView();
 }
 function changeQty(sku, delta){
   const it = CAT_BY_SKU[sku];
@@ -1262,10 +1264,10 @@ function changeQty(sku, delta){
   if(q<=0){ delete cart[sku]; }
   else if(q > it.stockBoxes){ notify('No hay suficiente stock disponible (stock actual: ' + it.stockBoxes + ' caja(s)).','error'); return; }
   else{ cart[sku] = q; }
-  saveCart(); renderCart(); updateCartBadge();
+  saveCart(); renderCart(); updateCartBadge(); refreshView();
 }
-function removeFromCart(sku){ delete cart[sku]; saveCart(); renderCart(); updateCartBadge(); }
-function clearCart(){ cart = {}; saveCart(); renderCart(); updateCartBadge(); }
+function removeFromCart(sku){ delete cart[sku]; saveCart(); renderCart(); updateCartBadge(); refreshView(); }
+function clearCart(){ cart = {}; saveCart(); renderCart(); updateCartBadge(); refreshView(); }
 function updateCartBadge(){
   const n = Object.values(cart).reduce((a,b)=>a+b,0);
   document.getElementById('cartBadge').textContent = n;
