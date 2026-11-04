@@ -372,6 +372,40 @@ body[data-dens="2"] .media-stock{font-size:7.5px;padding:2px 5px;left:5px;bottom
 .card .price-box{margin-bottom:4px;}
 @media (max-width:560px){ .toolbar-actions{flex-wrap:wrap;margin-left:0;width:100%;} }
 
+/* ---- Avisos y pedidos ---- */
+.modal .ui-box{width:400px;text-align:center;}
+.ui-icon{width:46px;height:46px;border-radius:50%;margin:0 auto 10px;display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:700;color:#fff;background:#555;}
+.ui-dialog[data-type=warn] .ui-icon{background:#c9a24b;}
+.ui-dialog[data-type=error] .ui-icon{background:#c0392b;}
+.ui-dialog[data-type=ok] .ui-icon{background:#2e8b57;}
+.ui-dialog[data-type=ask] .ui-icon{background:#111;}
+.ui-msg{white-space:pre-line;font-size:14px;color:#333;line-height:1.5;margin:8px 0 16px;text-align:left;max-height:50vh;overflow-y:auto;}
+.ui-box h3{margin:0;}
+.ui-box .modal-actions{justify-content:center;}
+#toastHost{position:fixed;left:50%;transform:translateX(-50%);bottom:24px;z-index:950;display:flex;flex-direction:column;gap:8px;align-items:center;pointer-events:none;width:max-content;max-width:92vw;}
+.toast{pointer-events:auto;background:#111;color:#fff;padding:11px 18px;border-radius:10px;font-size:14px;box-shadow:0 6px 24px rgba(0,0,0,.28);opacity:0;transform:translateY(12px);transition:.25s;border-left:4px solid #c9a24b;cursor:pointer;}
+.toast.show{opacity:1;transform:none;}
+.toast-error{border-left-color:#e0523f;}
+.toast-ok{border-left-color:#3cb371;}
+.modal .orders-box{width:860px;}
+.orders-head{display:flex;align-items:center;justify-content:space-between;gap:10px;}
+.orders-head h3{margin:0;}
+.orders-wrap{overflow-x:auto;}
+.orders-table{width:100%;border-collapse:collapse;font-size:14px;}
+.orders-table th{text-align:left;font-size:12px;text-transform:uppercase;letter-spacing:.04em;color:#666;padding:8px 10px;border-bottom:2px solid #c9a24b;}
+.orders-table td{padding:10px;border-bottom:1px solid #eee;vertical-align:top;}
+.orders-table .num{text-align:right;white-space:nowrap;}
+.orders-table .oid{font-size:11px;color:#888;margin-top:2px;}
+.orders-table .oact{white-space:nowrap;}
+.orders-table tfoot td{font-weight:700;border-top:2px solid #111;border-bottom:0;}
+.orders-empty{padding:30px 10px;text-align:center;color:#777;}
+
+.orders-login{max-width:300px;margin:18px auto;text-align:center;display:flex;flex-direction:column;gap:12px;}
+.orders-login .lock{font-size:34px;}
+.orders-login p{margin:0;color:#555;font-size:14px;}
+.orders-login input{padding:11px 12px;border:1px solid #ccc;border-radius:8px;font-size:15px;text-align:center;}
+.orders-err{color:#b00020;font-size:13px;font-weight:600;}
+
 </style>
 </head>
 <body>
@@ -407,6 +441,7 @@ body[data-dens="2"] .media-stock{font-size:7.5px;padding:2px 5px;left:5px;bottom
   <div class="toolbar-actions">
     <div class="cols-ctl" title="Artículos por fila"><span class="lbl">▦ Por fila</span><button type="button" id="colsMinus" onclick="changeCols(-1)" aria-label="Menos columnas">−</button><span class="val" id="colsVal">5</span><button type="button" id="colsPlus" onclick="changeCols(1)" aria-label="Más columnas">+</button></div>
     <button class="btn btn-outline" onclick="loadCatalog()" title="Actualizar catálogo">↻</button>
+    <button class="btn btn-outline" onclick="openOrders()">📋 Mis pedidos</button>
     <button class="btn btn-outline" onclick="openPromoInfo()">🏷 Promociones</button>
     <button class="btn btn-outline" id="btnCatalogPdf" onclick="exportCatalogPDF()" title="Descargar PDF de los artículos filtrados">📄 PDF</button>
     <button class="btn btn-dark" onclick="toggleCart(true)">🛒 Carrito <span id="cartBadge">0</span></button>
@@ -465,6 +500,26 @@ body[data-dens="2"] .media-stock{font-size:7.5px;padding:2px 5px;left:5px;bottom
     </div>
   </div>
 </div>
+
+<!-- MIS PEDIDOS -->
+<div class="modal" id="ordersModal">
+  <div class="box orders-box">
+    <div class="orders-head"><h3>📋 Mis pedidos</h3><button type="button" class="btn btn-outline btn-sm" onclick="closeOrders()">Cerrar</button></div>
+    <p class="hint">Todos los pedidos realizados. Descarga cada uno en PDF o Excel, igual al enviado por correo.</p>
+    <div id="ordersBody"></div>
+  </div>
+</div>
+
+<!-- DIÁLOGO Y AVISOS DE LA WEB -->
+<div class="modal ui-dialog" id="uiDialog" style="z-index:900">
+  <div class="box ui-box">
+    <div class="ui-icon" id="uiIcon">!</div>
+    <h3 id="uiTitle"></h3>
+    <div class="ui-msg" id="uiMsg"></div>
+    <div class="modal-actions" id="uiActions"></div>
+  </div>
+</div>
+<div id="toastHost" aria-live="polite"></div>
 
 
 <!-- CHECKOUT MODAL -->
@@ -765,6 +820,140 @@ function promoNote(l){
   return '';
 }
 
+/* ---------- AVISOS DENTRO DE LA WEB ---------- */
+let _uiResolve = null;
+function uiDialog(msg, o){
+  o = o || {};
+  const type = o.type || 'info';
+  const icons = { info:'i', warn:'!', error:'✕', ok:'✓', ask:'?' };
+  const titles = { info:'Aviso', warn:'Atención', error:'No se pudo completar', ok:'Listo', ask:'Confirmar' };
+  document.getElementById('uiDialog').dataset.type = type;
+  document.getElementById('uiIcon').textContent = icons[type] || 'i';
+  document.getElementById('uiTitle').textContent = o.title || titles[type] || 'Aviso';
+  document.getElementById('uiMsg').textContent = msg;
+  const acts = document.getElementById('uiActions');
+  acts.innerHTML = '';
+  return new Promise(res=>{
+    _uiResolve = res;
+    if(o.confirm){
+      const c = document.createElement('button'); c.className='btn btn-outline'; c.textContent=o.cancelText||'Cancelar'; c.onclick=()=>uiClose(false);
+      const k = document.createElement('button'); k.className='btn btn-dark'; k.textContent=o.okText||'Continuar'; k.onclick=()=>uiClose(true);
+      acts.appendChild(c); acts.appendChild(k); setTimeout(()=>k.focus(),30);
+    }else{
+      const k = document.createElement('button'); k.className='btn btn-dark'; k.textContent='Entendido'; k.onclick=()=>uiClose(true);
+      acts.appendChild(k); setTimeout(()=>k.focus(),30);
+    }
+    document.getElementById('uiDialog').classList.add('open');
+  });
+}
+function uiClose(v){
+  document.getElementById('uiDialog').classList.remove('open');
+  const r = _uiResolve; _uiResolve = null; if(r) r(v);
+}
+function uiAlert(msg, o){ return uiDialog(msg, o); }
+function uiConfirm(msg, o){ return uiDialog(msg, Object.assign({ confirm:true, type:'ask' }, o||{})); }
+function notify(msg, type){
+  const host = document.getElementById('toastHost');
+  if(!host) return;
+  const t = document.createElement('div');
+  t.className = 'toast toast-' + (type||'info');
+  t.textContent = msg;
+  t.onclick = ()=>t.remove();
+  host.appendChild(t);
+  requestAnimationFrame(()=>t.classList.add('show'));
+  setTimeout(()=>{ t.classList.remove('show'); setTimeout(()=>t.remove(),300); }, 4200);
+}
+document.addEventListener('keydown', e=>{
+  if(e.key==='Escape' && document.getElementById('uiDialog').classList.contains('open')) uiClose(false);
+});
+
+/* ---------- MIS PEDIDOS ---------- */
+const MY_ORDERS_KEY = 'dimarin_my_orders';
+function getMyOrderIds(){
+  try{ const a = JSON.parse(localStorage.getItem(MY_ORDERS_KEY)||'[]'); return Array.isArray(a)?a:[]; }catch(e){ return []; }
+}
+function rememberOrder(id){
+  try{
+    const a = getMyOrderIds().filter(x=>x!==id); a.unshift(id);
+    localStorage.setItem(MY_ORDERS_KEY, JSON.stringify(a.slice(0,200)));
+  }catch(e){}
+}
+let ORDERS_CACHE = {};
+function orderFromRow(r){
+  const items = (r.items||[]).map(it=>{
+    const meta = CAT_BY_SKU[it.sku] || {};
+    return { ...it, brand: it.brand || meta.brand, code: it.code || meta.code, gender: it.gender || meta.gender, img: it.img || meta.img, link: it.link || meta.link };
+  });
+  const subtotal = items.reduce((s,it)=>s + Number(it.gross_total != null ? it.gross_total : (it.line_total||0)), 0);
+  const total = Number(r.total);
+  return {
+    id: r.id, total, subtotal: Math.max(subtotal, total), discountTotal: Math.max(0, +(subtotal-total).toFixed(2)),
+    promos: r.promos || [], items,
+    customerName: r.customer_name, customerPhone: r.customer_phone, customerAddress: r.customer_address || '',
+    date: new Date(r.created_at)
+  };
+}
+function orderPairs(o){ return o.items.reduce((s,it)=>s + Number(it.qty||0)*Number(it.box_qty||0), 0); }
+function fmtDay(d){
+  const p=n=>String(n).padStart(2,'0');
+  return p(d.getDate())+'/'+p(d.getMonth()+1)+'/'+d.getFullYear()+' '+p(d.getHours())+':'+p(d.getMinutes());
+}
+let ORDERS_PIN = null;
+function openOrders(){
+  document.getElementById('ordersModal').classList.add('open');
+  if(ORDERS_PIN) loadOrders(); else showOrdersLogin();
+}
+function showOrdersLogin(msg){
+  document.getElementById('ordersBody').innerHTML =
+    '<form class="orders-login" onsubmit="submitOrdersLogin(event)"><div class="lock">🔒</div><p>Acceso restringido. Ingresa la contraseña para ver los pedidos.</p>' +
+    '<input type="password" id="ordersPin" placeholder="Contraseña" autocomplete="off" autofocus>' +
+    (msg ? '<div class="orders-err">'+esc(msg)+'</div>' : '') +
+    '<button type="submit" class="btn btn-dark" id="ordersPinBtn">Entrar</button></form>';
+  setTimeout(()=>{ const i=document.getElementById('ordersPin'); if(i) i.focus(); },50);
+}
+async function submitOrdersLogin(e){
+  e.preventDefault();
+  const pin = document.getElementById('ordersPin').value;
+  if(!pin) return;
+  const btn = document.getElementById('ordersPinBtn'); btn.disabled = true; btn.textContent = 'Verificando…';
+  ORDERS_PIN = pin;
+  await loadOrders(true);
+}
+async function loadOrders(fromLogin){
+  const body = document.getElementById('ordersBody');
+  if(!fromLogin) body.innerHTML = '<div class="orders-empty">Cargando pedidos…</div>';
+  try{
+    const { data, error } = await sb.rpc('get_all_orders', { p_pin: ORDERS_PIN });
+    if(error) throw error;
+    ORDERS_CACHE = {};
+    (data||[]).forEach(r=>{ ORDERS_CACHE[r.id] = orderFromRow(r); });
+    const list = Object.values(ORDERS_CACHE).sort((a,b)=>b.date-a.date);
+    if(!list.length){ body.innerHTML = '<div class="orders-empty">Todavía no hay pedidos.</div>'; return; }
+    const sumTotal = list.reduce((s,o)=>s+o.total,0), sumPairs = list.reduce((s,o)=>s+orderPairs(o),0);
+    body.innerHTML =
+      '<div class="orders-wrap"><table class="orders-table"><thead><tr><th>Día</th><th>Cliente</th><th class="num">Pares</th><th class="num">Total</th><th>Descargar</th></tr></thead><tbody>' +
+      list.map(o=>`<tr>
+        <td>${fmtDay(o.date)}<div class="oid">#${o.id.slice(0,8).toUpperCase()}</div></td>
+        <td>${esc(o.customerName)}<div class="oid">${esc(o.customerPhone)}</div></td>
+        <td class="num">${orderPairs(o).toLocaleString('es-NI')}</td>
+        <td class="num"><b>${money(o.total)}</b></td>
+        <td class="oact"><button class="btn btn-outline btn-sm" onclick="orderDownload('${o.id}','pdf')">PDF</button> <button class="btn btn-outline btn-sm" onclick="orderDownload('${o.id}','xls')">Excel</button></td>
+      </tr>`).join('') +
+      `</tbody><tfoot><tr><td colspan="2">${list.length} pedido${list.length===1?'':'s'}</td><td class="num">${sumPairs.toLocaleString('es-NI')}</td><td class="num">${money(sumTotal)}</td><td></td></tr></tfoot></table></div>`;
+  }catch(err){
+    console.error(err);
+    const bad = /PIN/i.test(err && err.message || '');
+    ORDERS_PIN = null;
+    if(bad || fromLogin) showOrdersLogin('Contraseña incorrecta.');
+    else body.innerHTML = '<div class="orders-empty">No se pudieron cargar los pedidos. Intenta de nuevo.</div>';
+  }
+}
+function closeOrders(){ ORDERS_PIN=null; ORDERS_CACHE={}; document.getElementById('ordersModal').classList.remove('open'); }
+async function orderDownload(id, kind){
+  const o = ORDERS_CACHE[id]; if(!o) return;
+  if(kind==='pdf') await generateOrderPDF(o); else await generateOrderExcel(o);
+}
+
 /* ---------- LOAD CATALOG ---------- */
 async function fetchAllProducts(){
   const out = [];
@@ -816,9 +1005,10 @@ async function loadCatalog(){
 }
 
 function updateHeroStats(){
-  document.getElementById('statProducts').textContent = CATALOG.length;
-  document.getElementById('statBrands').textContent = new Set(CATALOG.map(i=>i.brand)).size;
-  document.getElementById('statStock').textContent = CATALOG.reduce((a,b)=>a+b.stockBoxes,0);
+  const vis = CATALOG.filter(i => i.stockBoxes > 0);   // los agotados no cuentan ni se muestran
+  document.getElementById('statProducts').textContent = vis.length;
+  document.getElementById('statBrands').textContent = new Set(vis.map(i=>i.brand)).size;
+  document.getElementById('statStock').textContent = vis.reduce((a,b)=>a+b.stockBoxes,0);
 }
 
 /* ---------- FILTROS (selección múltiple) ---------- */
@@ -1032,8 +1222,8 @@ function addToCart(sku){
   const it = CAT_BY_SKU[sku];
   if(!it) return;
   const have = cart[sku] || 0;
-  if(it.stockBoxes<=0){ alert('Producto agotado.'); return; }
-  if(have+1 > it.stockBoxes){ alert('No hay suficiente stock disponible (stock actual: ' + it.stockBoxes + ' caja(s)).'); return; }
+  if(it.stockBoxes<=0){ notify('Producto agotado.','error'); return; }
+  if(have+1 > it.stockBoxes){ notify('No hay suficiente stock disponible (stock actual: ' + it.stockBoxes + ' caja(s)).','error'); return; }
   cart[sku] = have+1; saveCart(); renderCart(); updateCartBadge();
 }
 function changeQty(sku, delta){
@@ -1041,7 +1231,7 @@ function changeQty(sku, delta){
   if(!it) return;
   let q = (cart[sku]||0) + delta;
   if(q<=0){ delete cart[sku]; }
-  else if(q > it.stockBoxes){ alert('No hay suficiente stock disponible (stock actual: ' + it.stockBoxes + ' caja(s)).'); return; }
+  else if(q > it.stockBoxes){ notify('No hay suficiente stock disponible (stock actual: ' + it.stockBoxes + ' caja(s)).','error'); return; }
   else{ cart[sku] = q; }
   saveCart(); renderCart(); updateCartBadge();
 }
@@ -1168,10 +1358,10 @@ function validateCartStock(){
 
 function openCheckout(){
   const skus = Object.keys(cart);
-  if(!skus.length){ alert('El carrito está vacío.'); return; }
+  if(!skus.length){ notify('El carrito está vacío.','warn'); return; }
   const stockProblems = validateCartStock();
   if(stockProblems.length){
-    alert('No hay stock suficiente para continuar:\n\n' + stockProblems.join('\n'));
+    uiAlert('No hay stock suficiente para continuar:\n\n' + stockProblems.join('\n'),{type:'warn'});
     refreshStockOnly();
     return;
   }
@@ -1203,13 +1393,13 @@ async function submitCheckout(e){
   errEl.classList.remove('show');
   if(!name || !phone){
     errEl.textContent='Completa tu nombre y teléfono.'; errEl.classList.add('show');
-    alert('Faltan datos del cliente: completa tu nombre y número de teléfono para poder finalizar el pedido.');
+    notify('Completa tu nombre y teléfono para finalizar el pedido.','warn');
     return;
   }
 
   const stockProblems = validateCartStock();
   if(stockProblems.length){
-    alert('No hay stock suficiente para continuar con el pedido:\n\n' + stockProblems.join('\n'));
+    uiAlert('No hay stock suficiente para continuar con el pedido:\n\n' + stockProblems.join('\n'),{type:'warn'});
     refreshStockOnly();
     return;
   }
@@ -1243,6 +1433,7 @@ async function submitCheckout(e){
       date: new Date()
     };
 
+    rememberOrder(data.order_id);
     cart = {}; saveCart(); renderCart(); updateCartBadge();
     closeCheckout();
     showConfirm(lastOrder);
@@ -1253,7 +1444,7 @@ async function submitCheckout(e){
     const msg = (err && err.message) ? err.message : 'No se pudo procesar el pedido. Intenta de nuevo.';
     errEl.textContent = msg;
     errEl.classList.add('show');
-    alert('No se pudo confirmar el pedido:\n\n' + msg);
+    uiAlert(msg,{type:'error',title:'No se pudo confirmar el pedido'});
     refreshStockOnly();
   }finally{
     btn.disabled = false; btn.textContent = 'Confirmar pedido';
@@ -1502,7 +1693,7 @@ async function generateOrderPDF(order){
     doc.save('pedido-dimarin-' + order.id.slice(0,8) + '.pdf');
   }catch(err){
     console.error(err);
-    alert('Ocurrió un error al generar el PDF.');
+    notify('Ocurrió un error al generar el PDF.','error');
   }finally{ hideExportModal(); }
 }
 async function shareOrderPDF(order){
@@ -1513,7 +1704,7 @@ async function shareOrderPDF(order){
     await shareBlobOrDownload(doc.output('blob'), 'pedido-dimarin-' + order.id.slice(0,8) + '.pdf', 'application/pdf', order, popupWin);
   }catch(err){
     console.error(err);
-    alert('Ocurrió un error al generar el PDF.');
+    notify('Ocurrió un error al generar el PDF.','error');
     if(popupWin && !popupWin.closed) popupWin.close();
   }finally{ hideExportModal(); }
 }
@@ -1594,7 +1785,7 @@ async function generateOrderExcel(order){
     downloadBlob(new Blob([buf], { type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' }), 'pedido-dimarin-' + order.id.slice(0,8) + '.xlsx');
   }catch(err){
     console.error(err);
-    alert('Ocurrió un error al generar el Excel.');
+    notify('Ocurrió un error al generar el Excel.','error');
   }finally{ hideExportModal(); }
 }
 async function shareOrderExcel(order){
@@ -1607,7 +1798,7 @@ async function shareOrderExcel(order){
     await shareBlobOrDownload(new Blob([buf], { type:mime }), 'pedido-dimarin-' + order.id.slice(0,8) + '.xlsx', mime, order, popupWin);
   }catch(err){
     console.error(err);
-    alert('Ocurrió un error al generar el Excel.');
+    notify('Ocurrió un error al generar el Excel.','error');
     if(popupWin && !popupWin.closed) popupWin.close();
   }finally{ hideExportModal(); }
 }
@@ -1711,8 +1902,8 @@ async function buildCatalogPDFDoc(items){
 }
 async function exportCatalogPDF(){
   const items = getFiltered();
-  if(!items.length){ alert('No hay artículos en la selección actual para exportar.'); return; }
-  if(items.length > 300 && !confirm('Vas a exportar ' + items.length + ' artículos (' + Math.ceil(items.length/6) + ' páginas). Puede tardar un poco. ¿Continuar?')) return;
+  if(!items.length){ notify('No hay artículos en la selección actual para exportar.','warn'); return; }
+  if(items.length > 300 && !(await uiConfirm('Vas a exportar ' + items.length + ' artículos (' + Math.ceil(items.length/6) + ' páginas). Puede tardar un poco. ¿Continuar?'))) return;
   showExportModal('Generando catálogo PDF…', true);
   updateExportProgress(0, items.length);
   try{
@@ -1720,7 +1911,7 @@ async function exportCatalogPDF(){
     if(doc) doc.save('catalogo-dimarin-' + new Date().toISOString().slice(0,10) + '.pdf');
   }catch(err){
     console.error(err);
-    alert('Ocurrió un error al generar el catálogo PDF.');
+    notify('Ocurrió un error al generar el catálogo PDF.','error');
   }finally{ hideExportModal(); }
 }
 
