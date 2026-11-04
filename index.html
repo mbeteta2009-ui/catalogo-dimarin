@@ -405,6 +405,8 @@ body[data-dens="2"] .media-stock{font-size:7.5px;padding:2px 5px;left:5px;bottom
 .orders-login p{margin:0;color:#555;font-size:14px;}
 .orders-login input{padding:11px 12px;border:1px solid #ccc;border-radius:8px;font-size:15px;text-align:center;}
 .orders-err{color:#b00020;font-size:13px;font-weight:600;}
+.field select{width:100%;padding:11px 12px;border:1px solid #ddd;border-radius:8px;font-size:14px;font-family:inherit;background:#fff;}
+.field select:focus{outline:none;border-color:var(--gold);box-shadow:0 0 0 3px rgba(201,162,75,.15);}
 
 </style>
 </head>
@@ -536,6 +538,10 @@ body[data-dens="2"] .media-stock{font-size:7.5px;padding:2px 5px;left:5px;bottom
       <div class="field">
         <label>Número de teléfono</label>
         <input type="tel" id="custPhone" required placeholder="Ej. 8888-8888">
+      </div>
+      <div class="field">
+        <label>Vendedor</label>
+        <select id="custSeller" required><option value="">Selecciona un vendedor…</option><option value="Augusto Escobar">Augusto Escobar</option><option value="Carlos Osorno">Carlos Osorno</option><option value="Fadel Castillo">Fadel Castillo</option><option value="Jonathan Zelaya">Jonathan Zelaya</option><option value="José Morales">José Morales</option></select>
       </div>
       <div class="field">
         <label>Dirección <span style="font-weight:400;color:#999;">(opcional)</span></label>
@@ -889,7 +895,7 @@ function orderFromRow(r){
   return {
     id: r.id, total, subtotal: Math.max(subtotal, total), discountTotal: Math.max(0, +(subtotal-total).toFixed(2)),
     promos: r.promos || [], items,
-    customerName: r.customer_name, customerPhone: r.customer_phone, customerAddress: r.customer_address || '',
+    customerName: r.customer_name, customerPhone: r.customer_phone, customerAddress: r.customer_address || '', seller: r.seller || '',
     date: new Date(r.created_at)
   };
 }
@@ -899,6 +905,7 @@ function fmtDay(d){
   return p(d.getDate())+'/'+p(d.getMonth()+1)+'/'+d.getFullYear()+' '+p(d.getHours())+':'+p(d.getMinutes());
 }
 let ORDERS_PIN = null;
+const ORDERS_FROM = new Date('2026-11-04T00:00:00-06:00'); // solo pedidos desde esta fecha en adelante
 function openOrders(){
   document.getElementById('ordersModal').classList.add('open');
   if(ORDERS_PIN) loadOrders(); else showOrdersLogin();
@@ -926,20 +933,21 @@ async function loadOrders(fromLogin){
     const { data, error } = await sb.rpc('get_all_orders', { p_pin: ORDERS_PIN });
     if(error) throw error;
     ORDERS_CACHE = {};
-    (data||[]).forEach(r=>{ ORDERS_CACHE[r.id] = orderFromRow(r); });
+    (data||[]).forEach(r=>{ const o = orderFromRow(r); if(o.date >= ORDERS_FROM) ORDERS_CACHE[r.id] = o; });
     const list = Object.values(ORDERS_CACHE).sort((a,b)=>b.date-a.date);
     if(!list.length){ body.innerHTML = '<div class="orders-empty">Todavía no hay pedidos.</div>'; return; }
     const sumTotal = list.reduce((s,o)=>s+o.total,0), sumPairs = list.reduce((s,o)=>s+orderPairs(o),0);
     body.innerHTML =
-      '<div class="orders-wrap"><table class="orders-table"><thead><tr><th>Día</th><th>Cliente</th><th class="num">Pares</th><th class="num">Total</th><th>Descargar</th></tr></thead><tbody>' +
+      '<div class="orders-wrap"><table class="orders-table"><thead><tr><th>Día</th><th>Cliente</th><th>Vendedor</th><th class="num">Pares</th><th class="num">Total</th><th>Descargar</th></tr></thead><tbody>' +
       list.map(o=>`<tr>
         <td>${fmtDay(o.date)}<div class="oid">#${o.id.slice(0,8).toUpperCase()}</div></td>
         <td>${esc(o.customerName)}<div class="oid">${esc(o.customerPhone)}</div></td>
+        <td>${o.seller ? esc(o.seller) : '—'}</td>
         <td class="num">${orderPairs(o).toLocaleString('es-NI')}</td>
         <td class="num"><b>${money(o.total)}</b></td>
         <td class="oact"><button class="btn btn-outline btn-sm" onclick="orderDownload('${o.id}','pdf')">PDF</button> <button class="btn btn-outline btn-sm" onclick="orderDownload('${o.id}','xls')">Excel</button></td>
       </tr>`).join('') +
-      `</tbody><tfoot><tr><td colspan="2">${list.length} pedido${list.length===1?'':'s'}</td><td class="num">${sumPairs.toLocaleString('es-NI')}</td><td class="num">${money(sumTotal)}</td><td></td></tr></tfoot></table></div>`;
+      `</tbody><tfoot><tr><td colspan="3">${list.length} pedido${list.length===1?'':'s'}</td><td class="num">${sumPairs.toLocaleString('es-NI')}</td><td class="num">${money(sumTotal)}</td><td></td></tr></tfoot></table></div>`;
   }catch(err){
     console.error(err);
     const bad = /PIN/i.test(err && err.message || '');
@@ -1370,6 +1378,7 @@ function openCheckout(){
   openCheckoutForm(calc);
 }
 function openCheckoutForm(calc){
+  try{ const el=document.getElementById('custSeller'); if(el && !el.value) el.value = localStorage.getItem('dimarin_seller')||''; }catch(e){}
   const summary = document.getElementById('checkoutSummary');
   const rows = calc.lines.map(l=>{
     const note = promoNote(l);
@@ -1389,11 +1398,12 @@ async function submitCheckout(e){
   const name = document.getElementById('custName').value.trim();
   const phone = document.getElementById('custPhone').value.trim();
   const address = document.getElementById('custAddress').value.trim();
+  const seller = document.getElementById('custSeller').value.trim();
   const errEl = document.getElementById('checkoutError');
   errEl.classList.remove('show');
-  if(!name || !phone){
-    errEl.textContent='Completa tu nombre y teléfono.'; errEl.classList.add('show');
-    notify('Completa tu nombre y teléfono para finalizar el pedido.','warn');
+  if(!name || !phone || !seller){
+    errEl.textContent='Completa nombre, teléfono y vendedor.'; errEl.classList.add('show');
+    notify('Completa nombre, teléfono y vendedor para finalizar el pedido.','warn');
     return;
   }
 
@@ -1412,7 +1422,8 @@ async function submitCheckout(e){
       p_customer_name: name,
       p_customer_phone: phone,
       p_items: items,
-      p_customer_address: address
+      p_customer_address: address,
+      p_seller: seller
     });
     if(error) throw error;
 
@@ -1430,9 +1441,11 @@ async function submitCheckout(e){
       customerName: name,
       customerPhone: phone,
       customerAddress: address,
+      seller,
       date: new Date()
     };
 
+    try{ localStorage.setItem('dimarin_seller', seller); }catch(e){}
     rememberOrder(data.order_id);
     cart = {}; saveCart(); renderCart(); updateCartBadge();
     closeCheckout();
@@ -1463,6 +1476,7 @@ function showConfirm(order){
     `Pedido <b>#${order.id.slice(0,8).toUpperCase()}</b><br>` +
     `${order.date.toLocaleString('es-NI')}<br>` +
     `<b>${esc(order.customerName)}</b> · ${esc(order.customerPhone)}` +
+    (order.seller ? `<br>Vendedor: <b>${esc(order.seller)}</b>` : '') +
     (order.customerAddress ? `<br>${esc(order.customerAddress)}` : '');
   const itemsHtml = order.items.map(it=>{
     const note = orderItemNote(it);
@@ -1607,6 +1621,11 @@ async function buildOrderPDFDoc(order, silent){
     doc.setFont('helvetica','normal');
     doc.text(order.customerName + '   ·   Tel: ' + order.customerPhone, marginX + 46, y);
     y += 15;
+    if(order.seller){
+      doc.setFont('helvetica','bold'); doc.text('Vendedor:', marginX, y);
+      doc.setFont('helvetica','normal'); doc.text(order.seller, marginX + 52, y);
+      y += 15;
+    }
     if(order.customerAddress){
       doc.setFont('helvetica','bold'); doc.text('Dirección:', marginX, y);
       doc.setFont('helvetica','normal'); doc.text(order.customerAddress, marginX + 58, y);
@@ -1727,6 +1746,7 @@ async function buildOrderExcelWorkbook(order, silent){
   meta('Fecha:', order.date.toLocaleString('es-NI'));
   meta('Cliente:', order.customerName);
   meta('Teléfono:', order.customerPhone);
+  if(order.seller) meta('Vendedor:', order.seller);
   if(order.customerAddress) meta('Dirección:', order.customerAddress);
   r++;
   const headerRowIdx = r;
