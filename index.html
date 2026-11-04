@@ -1716,6 +1716,7 @@ async function buildOrderPDFDoc(order, silent){
   const lines = [];
   lines.push({ t:'Subtotal:', v: money(order.subtotal), red:false });
   (order.promos||[]).forEach(p => lines.push({ t: p.label, v: '- ' + money(p.amount), red:true }));
+  if(Number(order.discountTotal) > 0) lines.push({ t:'Total ahorrado:', v: '- ' + money(order.discountTotal), red:true, bold:true, rule:true });
   if(y + 30 + lines.length*16 + 70 > pageH - 30){ doc.addPage(); y = 40; }
   y += 10;
   doc.setDrawColor(0); doc.setLineWidth(1);
@@ -1723,6 +1724,11 @@ async function buildOrderPDFDoc(order, silent){
   y += 18;
   doc.setFont('helvetica','normal'); doc.setFontSize(10);
   lines.forEach(l=>{
+    if(l.rule){
+      doc.setDrawColor(200); doc.setLineWidth(.6);
+      doc.line(pageW - marginX - 330, y - 11, pageW - marginX, y - 11);
+      doc.setFont('helvetica','bold');
+    }else{ doc.setFont('helvetica','normal'); }
     doc.setTextColor(l.red?176:90, l.red?0:90, l.red?32:90);
     doc.text(l.t, pageW - marginX - 330, y);
     doc.text(l.v, pageW - marginX, y, { align:'right' });
@@ -1732,12 +1738,6 @@ async function buildOrderPDFDoc(order, silent){
   y += 8;
   doc.setFont('helvetica','bold'); doc.setFontSize(14);
   doc.text('Total: ' + money(order.total), pageW - marginX, y, { align:'right' });
-  if(Number(order.discountTotal) > 0){
-    y += 16;
-    doc.setFont('helvetica','bold'); doc.setFontSize(10); doc.setTextColor(176,0,32);
-    doc.text('Total ahorrado en promociones: ' + money(order.discountTotal), pageW - marginX, y, { align:'right' });
-    doc.setTextColor(0);
-  }
   return doc;
 }
 
@@ -1771,7 +1771,7 @@ async function buildOrderExcelWorkbook(order, silent){
   const sheet = workbook.addWorksheet('Pedido');
   sheet.columns = [
     { width: 10 }, { width: 16 }, { width: 18 }, { width: 14 }, { width: 10 }, { width: 16 },
-    { width: 11 }, { width: 12 }, { width: 14 }, { width: 14 }, { width: 14 }, { width: 26 }, { width: 15 }, { width: 14 }
+    { width: 11 }, { width: 12 }, { width: 14 }, { width: 14 }, { width: 14 }, { width: 26 }, { width: 18 }, { width: 15 }
   ];
   sheet.mergeCells('A1:N1');
   sheet.getCell('A1').value = 'Pedido Mayorista — Kenman, SA | Dimarin';
@@ -1817,7 +1817,7 @@ async function buildOrderExcelWorkbook(order, silent){
     }else{
       row.getCell(12).value = xNote || '—';
     }
-    row.getCell(12).alignment = { wrapText:true, vertical:'middle' };
+    row.getCell(12).alignment = { wrapText:true, vertical:'middle', indent:1 };
     for(let c=1;c<=14;c++){ if(c!==12) row.getCell(c).alignment = { vertical:'middle', horizontal: c>=7 && c!==12 ? 'right' : undefined }; }
     row.getCell(13).value = -Number(it.promo_discount || 0);
     row.getCell(14).value = Number(it.line_total);
@@ -1841,8 +1841,8 @@ async function buildOrderExcelWorkbook(order, silent){
   };
   put('Subtotal:', Number(order.subtotal));
   (order.promos||[]).forEach(p => put(p.label, -Number(p.amount), { red:true }));
+  if(Number(order.discountTotal) > 0) put('Total ahorrado:', -Number(order.discountTotal), { red:true, bold:true });
   put('TOTAL', Number(order.total), { bold:true, size:12 });
-  if(Number(order.discountTotal) > 0) put('Total ahorrado en promociones', Number(order.discountTotal), { red:true, bold:true });
   return workbook;
 }
 async function generateOrderExcel(order){
