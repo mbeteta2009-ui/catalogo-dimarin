@@ -295,26 +295,6 @@ footer{padding:34px 22px;text-align:center;color:var(--muted);font-size:12px;bac
 .cols-ctl button:hover:not(:disabled){background:#f1eee6;}
 .cols-ctl button:disabled{opacity:.3;cursor:not-allowed;}
 .cols-ctl .val{min-width:22px;text-align:center;font-weight:800;font-size:13px;}
-body[data-dens="1"] .grid{gap:11px;padding:0 14px;}
-body[data-dens="1"] .card img{height:150px;padding:6px;}
-body[data-dens="1"] .card-body{padding:8px 9px 11px;gap:4px;}
-body[data-dens="1"] .brand{font-size:11.5px;}
-body[data-dens="1"] .code{font-size:10.5px;}
-body[data-dens="1"] .price-unit .unit-net{font-size:17px;}
-body[data-dens="1"] .btn-add{font-size:11px;padding:8px 4px;}
-body[data-dens="1"] .chip-gender,body[data-dens="1"] .chip-pres,body[data-dens="1"] .chip-promo{font-size:9.5px;padding:2px 6px;}
-body[data-dens="2"] .grid{gap:8px;padding:0 10px;}
-body[data-dens="2"] .card img{height:112px;padding:4px;}
-body[data-dens="2"] .card-body{padding:6px 7px 9px;gap:3px;}
-body[data-dens="2"] .brand{font-size:10px;}
-body[data-dens="2"] .code{font-size:9px;overflow-wrap:anywhere;}
-body[data-dens="2"] .price-unit .unit-net{font-size:14px;}
-body[data-dens="2"] .price-unit .unit-label,body[data-dens="2"] .price-box .box-label{font-size:8px;}
-body[data-dens="2"] .price-box .box-net{font-size:10.5px;}
-body[data-dens="2"] .stock-chip{font-size:9px;padding:2px 5px;}
-body[data-dens="2"] .btn-add{font-size:9.5px;padding:7px 2px;margin-top:6px;}
-body[data-dens="2"] .chip-gender,body[data-dens="2"] .chip-pres,body[data-dens="2"] .chip-promo{font-size:8.5px;padding:1px 5px;}
-body[data-dens="2"] .badges{gap:3px;}
 
 /* Detalle de promociones */
 .pd-toggle{display:block;margin:8px 0 0;background:none;border:none;padding:2px 0;color:#1f6b3a;font-weight:700;font-size:12.5px;cursor:pointer;text-decoration:underline;}
@@ -329,6 +309,68 @@ body[data-dens="2"] .badges{gap:3px;}
 .pd-tot{display:flex;justify-content:space-between;font-weight:800;padding:5px 0 2px;}
 
 .pd-free{display:inline-block;background:#1f6b3a;color:#fff;font-size:9.5px;font-weight:800;letter-spacing:.4px;padding:1px 6px;border-radius:8px;vertical-align:middle;}
+
+/* ===== Tarjetas estilo galería: la imagen manda ===== */
+.grid{gap:18px;padding:0 22px;}
+.card{background:#fff;border:none;border-radius:6px;box-shadow:0 1px 2px rgba(0,0,0,.06);transition:box-shadow .2s,transform .2s;}
+.card:hover{box-shadow:0 14px 30px rgba(0,0,0,.13);transform:translateY(-3px);}
+.card-media{position:relative;aspect-ratio:1/1.08;background:#fff;cursor:zoom-in;overflow:hidden;display:flex;align-items:center;justify-content:center;}
+.card-media img{width:100%;height:100%;object-fit:contain;padding:4% 3%;background:transparent;cursor:zoom-in;transition:transform .35s ease;}
+.card:hover .card-media img{transform:scale(1.05);}
+.media-tag{position:absolute;top:10px;left:10px;font-size:10px;font-weight:800;letter-spacing:.6px;text-transform:uppercase;padding:4px 9px;border-radius:3px;box-shadow:0 1px 3px rgba(0,0,0,.12);}
+.media-stock{position:absolute;left:10px;bottom:9px;margin:0;font-size:10px;padding:3px 8px;}
+.card .card-body{padding:12px 14px 14px;gap:7px;background:#fafaf8;border-top:1px solid #f0eee8;}
+.info-top{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;}
+.ids{min-width:0;}
+.card .code{font-size:13px;font-weight:600;color:#1b1b1b;letter-spacing:.2px;overflow-wrap:anywhere;line-height:1.25;}
+.card .brand{font-size:11px;font-weight:600;color:#6b6b6b;letter-spacing:.8px;margin-top:2px;}
+.card .sku{font-size:10.5px;color:#9a9a9a;margin-top:1px;}
+.card .price-unit{margin:0;text-align:right;flex:0 0 auto;}
+.card .price-unit .unit-net{display:block;font-size:19px;font-weight:800;color:#111;line-height:1.1;}
+.card .price-unit .unit-label{display:block;font-size:8.5px;color:var(--gold);font-weight:700;letter-spacing:.5px;text-transform:uppercase;margin-top:2px;}
+.info-mid{display:flex;gap:6px;flex-wrap:wrap;}
+.card .price-box{margin:0;display:flex;justify-content:space-between;align-items:baseline;border-top:1px dashed #e6e3da;padding-top:7px;}
+.card .price-box .box-label{display:inline;font-size:10.5px;color:#8a8a8a;}
+.card .price-box .box-net{font-size:13px;font-weight:700;color:#444;}
+.card .btn-add{margin-top:4px;background:#fff;color:#111;border:1px solid #111;border-radius:4px;padding:9px;font-size:11.5px;letter-spacing:.8px;text-transform:uppercase;transition:background .15s,color .15s;}
+.card .btn-add:hover:not(:disabled){background:#111;color:#fff;}
+/* densidad según columnas */
+body[data-dens="1"] .grid{gap:12px;padding:0 14px;}
+body[data-dens="1"] .card .card-body{padding:9px 10px 11px;gap:6px;}
+body[data-dens="1"] .card .code{font-size:11.5px;}
+body[data-dens="1"] .card .brand{font-size:9.5px;}
+body[data-dens="1"] .card .sku{font-size:9px;}
+body[data-dens="1"] .card .price-unit .unit-net{font-size:15px;}
+body[data-dens="1"] .card .price-unit .unit-label{font-size:7.5px;}
+body[data-dens="1"] .chip-gender,body[data-dens="1"] .chip-pres{font-size:9px;padding:2px 6px;}
+body[data-dens="1"] .card .btn-add{font-size:10px;padding:7px 3px;}
+body[data-dens="1"] .media-tag{font-size:8.5px;padding:3px 6px;top:7px;left:7px;}
+body[data-dens="1"] .media-stock{font-size:8.5px;padding:2px 6px;left:7px;bottom:6px;}
+body[data-dens="2"] .grid{gap:8px;padding:0 10px;}
+body[data-dens="2"] .card .card-body{padding:7px 8px 9px;gap:5px;}
+body[data-dens="2"] .info-top{flex-direction:column;gap:4px;}
+body[data-dens="2"] .card .price-unit{text-align:left;}
+body[data-dens="2"] .card .code{font-size:10px;}
+body[data-dens="2"] .card .brand{font-size:8.5px;}
+body[data-dens="2"] .card .sku{font-size:8px;}
+body[data-dens="2"] .card .price-unit .unit-net{font-size:13.5px;}
+body[data-dens="2"] .card .price-unit .unit-label{font-size:6.5px;}
+body[data-dens="2"] .info-mid{gap:3px;}
+body[data-dens="2"] .chip-gender,body[data-dens="2"] .chip-pres{font-size:7px;padding:1px 4px;}
+body[data-dens="2"] .card .price-box .box-label{font-size:8px;}
+body[data-dens="2"] .card .price-box .box-net{font-size:10px;}
+body[data-dens="2"] .card .btn-add{font-size:9px;padding:6px 2px;letter-spacing:.3px;}
+body[data-dens="2"] .media-tag{font-size:7.5px;padding:2px 5px;top:5px;left:5px;}
+body[data-dens="2"] .media-stock{font-size:7.5px;padding:2px 5px;left:5px;bottom:5px;}
+@media (max-width:560px){
+  .grid{gap:10px;padding:0 10px;}
+  .card .price-unit .unit-net{font-size:16px;}
+  .card .card-body{padding:9px 10px 11px;}
+}
+.card .card-body{flex:1;}
+.card .btn-add{margin-top:auto;}
+.card .price-box{margin-bottom:4px;}
+@media (max-width:560px){ .toolbar-actions{flex-wrap:wrap;margin-left:0;width:100%;} }
 
 </style>
 </head>
@@ -910,29 +952,32 @@ function cardHTML(it){
   const stockClass = it.stockBoxes<=2 ? 'stock-low' : 'stock-ok';
   const stockText = it.stockBoxes + ' caja' + (it.stockBoxes===1?'':'s') + ' disp.';
   return `
-  <div class="card" data-sku="${esc(it.sku)}">
-    <img src="${esc(it.img)}" alt="${esc(it.code)}" loading="lazy" decoding="async" onerror="this.style.opacity=0.25" onclick="openLightbox('${esc(it.img)}')">
+  <article class="card" data-sku="${esc(it.sku)}">
+    <div class="card-media" onclick="openLightbox('${esc(it.img)}')">
+      <img src="${esc(it.img)}" alt="${esc(it.code)}" loading="lazy" decoding="async" onerror="this.style.opacity=0.25">
+      ${it.promo?`<span class="chip-promo ${it.promo} media-tag">${SEG_LABEL[it.promo]}</span>`:''}
+      <span class="stock-chip ${stockClass} media-stock">${stockText}</span>
+    </div>
     <div class="card-body">
-      <div class="badges">
-        ${it.promo?`<span class="chip-promo ${it.promo}">${SEG_LABEL[it.promo]}</span>`:''}
+      <div class="info-top">
+        <div class="ids">
+          ${it.code?`<div class="code">${esc(it.code)}</div>`:''}
+          <div class="brand">${esc(it.brand)}</div>
+          <div class="sku">SKU ${esc(it.sku)}</div>
+        </div>
+        <div class="price-unit">
+          <span class="unit-net">${money(unit)}</span>
+          <span class="unit-label">Precio unitario</span>
+        </div>
+      </div>
+      <div class="info-mid">
         ${it.gender?`<span class="chip-gender">${esc(it.gender)}</span>`:''}
         <span class="chip-pres">${esc(pres)}</span>
       </div>
-      <div class="brand">${esc(it.brand)}</div>
-      ${it.code?`<div class="code">${esc(it.code)}</div>`:''}
-      <div class="code">SKU ${esc(it.sku)}</div>
-      <div class="price-unit">
-        <span class="unit-label">Precio unitario</span>
-        <span class="unit-net">${money(unit)}</span>
-      </div>
-      <div class="price-box">
-        <span class="box-label">Precio por caja</span>
-        <span class="box-net">${money(box)}</span>
-      </div>
-      <span class="stock-chip ${stockClass}">${stockText}</span>
+      <div class="price-box"><span class="box-label">Precio por caja</span><span class="box-net">${money(box)}</span></div>
       <button class="btn-add" onclick="addToCart('${esc(it.sku)}')">Agregar al pedido</button>
     </div>
-  </div>`;
+  </article>`;
 }
 
 function renderCatalog(items){
