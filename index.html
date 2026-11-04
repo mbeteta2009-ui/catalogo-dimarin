@@ -328,6 +328,8 @@ body[data-dens="2"] .badges{gap:3px;}
 .pd-sub{font-size:11px;color:#6b6b6b;padding:4px 0;}
 .pd-tot{display:flex;justify-content:space-between;font-weight:800;padding:5px 0 2px;}
 
+.pd-free{display:inline-block;background:#1f6b3a;color:#fff;font-size:9.5px;font-weight:800;letter-spacing:.4px;padding:1px 6px;border-radius:8px;vertical-align:middle;}
+
 </style>
 </head>
 <body>
@@ -1013,23 +1015,24 @@ let PROMO_DETAIL_OPEN = false;
 function togglePromoDetail(){ PROMO_DETAIL_OPEN = !PROMO_DETAIL_OPEN; renderCart(); }
 function itemName(it){ return (it.brand||'') + ' · ' + (it.code||it.sku); }
 function promoDetailHTML(calc){
-  const row = (name, mid, amt, neg) => `<div class="pd-row"><div class="pd-n">${esc(name)}<small>${mid}</small></div><div class="pd-a${neg?' neg':''}">${amt}</div></div>`;
+  const row = (name, mid, amt, neg, free, sku) => `<div class="pd-row"><div class="pd-n">${esc(name)}${free?' <span class="pd-free">GRATIS</span>':''}<small>SKU ${esc(sku)}</small><small>${mid}</small></div><div class="pd-a${neg?' neg':''}">${amt}</div></div>`;
   let h = '<div class="pd">';
   calc.promos.forEach(p=>{
     const L = calc.lines.filter(l => l.promo === p.promo && (p.promo !== 'C' || l.it.brand === p.brand));
     if(p.promo === 'A'){
       h += `<div class="pd-h">PROMO A · ${p.pct}% de descuento<small>${p.boxes} cajas en el segmento (se suman todas las marcas)</small></div>`;
-      L.forEach(l => { h += row(itemName(l.it), `${l.qty} ${plural(l.qty,'caja','cajas')} × ${money(l.boxC/100)} = ${money(l.grossC/100)}`, '−' + money(l.discC/100), true); });
+      L.forEach(l => { h += row(itemName(l.it), `${l.qty} ${plural(l.qty,'caja','cajas')} × ${money(l.boxC/100)} = ${money(l.grossC/100)}`, '−' + money(l.discC/100), true, false, l.sku); });
+      h += `<div class="pd-sub">PROMO A es un descuento porcentual: no hay cajas gratis, el ahorro se reparte en todas las cajas.</div>`;
     }else if(p.promo === 'B'){
       h += `<div class="pd-h">PROMO B · ${p.free} ${plural(p.free,'caja gratis','cajas gratis')}<small>${p.boxes} cajas en el segmento · las gratis son las de menor valor</small></div>`;
-      L.filter(l => l.freeBoxes > 0).forEach(l => { h += row(itemName(l.it), `${l.freeBoxes} de ${l.qty} ${plural(l.qty,'caja','cajas')} gratis × ${money(l.boxC/100)}`, '−' + money(l.discC/100), true); });
+      L.filter(l => l.freeBoxes > 0).forEach(l => { h += row(itemName(l.it), `${l.freeBoxes} de ${l.qty} ${plural(l.qty,'caja','cajas')} gratis × ${money(l.boxC/100)}`, '−' + money(l.discC/100), true, true, l.sku); });
       const paid = L.filter(l => !(l.freeBoxes > 0));
-      if(paid.length) h += `<div class="pd-sub">Sin cajas gratis: ${paid.map(l => esc(itemName(l.it)) + ' (' + l.qty + ')').join(', ')}</div>`;
+      if(paid.length) h += `<div class="pd-sub">Sin cajas gratis: ${paid.map(l => esc(itemName(l.it)) + ' [SKU ' + esc(l.sku) + '] (' + l.qty + ')').join(', ')}</div>`;
     }else{
       h += `<div class="pd-h">PROMO C · ${esc(p.brand)} · ${p.free} ${plural(p.free,cWord(p.brand)[0]+' gratis',cWord(p.brand)[1]+' gratis')}<small>${p.units} ${cWord(p.brand)[1]} de ${esc(p.brand)} · las gratis son las más baratas</small></div>`;
-      L.filter(l => l.freeUnits > 0).forEach(l => { h += row(itemName(l.it), `${l.freeUnits} de ${l.qty*l.it.boxQty} ${plural(l.qty*l.it.boxQty,cWord(l.it.brand)[0],cWord(l.it.brand)[1])} gratis × ${money(l.unitMicro/10000)}`, '−' + money(l.discC/100), true); });
+      L.filter(l => l.freeUnits > 0).forEach(l => { h += row(itemName(l.it), `${l.freeUnits} de ${l.qty*l.it.boxQty} ${plural(l.qty*l.it.boxQty,cWord(l.it.brand)[0],cWord(l.it.brand)[1])} gratis × ${money(l.unitMicro/10000)}`, '−' + money(l.discC/100), true, true, l.sku); });
       const paid = L.filter(l => !(l.freeUnits > 0));
-      if(paid.length) h += `<div class="pd-sub">Sin ${cWord(p.brand)[1]} gratis: ${paid.map(l => esc(itemName(l.it)) + ' (' + l.qty*l.it.boxQty + ')').join(', ')}</div>`;
+      if(paid.length) h += `<div class="pd-sub">Sin ${cWord(p.brand)[1]} gratis: ${paid.map(l => esc(itemName(l.it)) + ' [SKU ' + esc(l.sku) + '] (' + l.qty*l.it.boxQty + ')').join(', ')}</div>`;
     }
     h += `<div class="pd-tot"><span>Ahorro ${SEG_LABEL[p.promo]}${p.promo==='C'?' · '+esc(p.brand):''}</span><span>−${money(p.amountC/100)}</span></div>`;
   });
