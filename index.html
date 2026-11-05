@@ -1920,9 +1920,9 @@ function filterSummaryText(){
   if(SORT) parts.push('Orden: ' + SORT_LABEL[SORT]);
   return parts.join('  ·  ');
 }
-const CATALOG_FIELD_DEFAULTS = { image:true, brand:true, code:true, sku:true, gender:true, unitPrice:true, boxPrice:false, boxQty:false, stock:true };
+const CATALOG_FIELD_DEFAULTS = { image:true, imageLink:true, brand:true, code:true, sku:true, gender:true, unitPrice:true, boxPrice:false, boxQty:false, stock:true };
 const CATALOG_FIELD_LABELS = [
-  ['image','Imagen'],['brand','Marca'],['code','Código / modelo'],['sku','SKU'],['gender','Género'],
+  ['image','Imagen'],['imageLink','Foto ampliable (enlace)'],['brand','Marca'],['code','Código / modelo'],['sku','SKU'],['gender','Género'],
   ['unitPrice','Precio unitario'],['boxPrice','Precio por caja'],['boxQty','Unidades por caja'],['stock','Existencia']
 ];
 function loadCatalogFields(){
@@ -2024,6 +2024,7 @@ async function buildCatalogPDFDoc(items, opts){
         if(a){
           const sc = Math.min(box/a.w, box/a.h), dw = a.w*sc, dh = a.h*sc;
           try{ doc.addImage(a.dataUrl, a.ext.toUpperCase()==='PNG'?'PNG':'JPEG', ix + (box-dw)/2, iy + (box-dh)/2, dw, dh); }catch(e){}
+          if(opts.imageLink && it.img) try{ doc.link(ix, iy, box, box, { url: it.img }); }catch(e){}
         }else{
           doc.setDrawColor(235); doc.rect(ix, iy, box, box);
           doc.setFontSize(8); doc.setTextColor(170); doc.text('Sin imagen', cx + cellW/2, iy + box/2, { align:'center' });
