@@ -1764,11 +1764,27 @@ async function buildOrderPDFDoc(order, silent){
   return doc;
 }
 
+const ORDER_SEQ_CACHE = {};
+async function orderFileName(order, ext){
+  const n = String(order.customerName||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'')
+    .replace(/[^A-Za-z0-9]+/g,'-').replace(/^-+|-+$/g,'').slice(0,50) || 'Sin-nombre';
+  let seq = 1;
+  if(order.id){
+    if(ORDER_SEQ_CACHE[order.id]) seq = ORDER_SEQ_CACHE[order.id];
+    else{
+      try{
+        const r = await sb.rpc('order_day_seq', { p_id: order.id });
+        if(!r.error && Number(r.data) > 0){ seq = Number(r.data); ORDER_SEQ_CACHE[order.id] = seq; }
+      }catch(e){}
+    }
+  }
+  return 'Pedido-' + n + (seq > 1 ? '-' + seq : '') + '.' + ext;
+}
 async function generateOrderPDF(order){
   if(!order) return;
   try{
     const doc = await buildOrderPDFDoc(order);
-    doc.save('pedido-dimarin-' + order.id.slice(0,8) + '.pdf');
+    doc.save(await orderFileName(order,'pdf'));
   }catch(err){
     console.error(err);
     notify('Ocurrió un error al generar el PDF.','error');
@@ -1779,7 +1795,7 @@ async function shareOrderPDF(order){
   const popupWin = window.open('', '_blank');
   try{
     const doc = await buildOrderPDFDoc(order);
-    await shareBlobOrDownload(doc.output('blob'), 'pedido-dimarin-' + order.id.slice(0,8) + '.pdf', 'application/pdf', order, popupWin);
+    await shareBlobOrDownload(doc.output('blob'), await orderFileName(order,'pdf'), 'application/pdf', order, popupWin);
   }catch(err){
     console.error(err);
     notify('Ocurrió un error al generar el PDF.','error');
@@ -1873,7 +1889,7 @@ async function generateOrderExcel(order){
   try{
     const wb = await buildOrderExcelWorkbook(order);
     const buf = await wb.xlsx.writeBuffer();
-    downloadBlob(new Blob([buf], { type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' }), 'pedido-dimarin-' + order.id.slice(0,8) + '.xlsx');
+    downloadBlob(new Blob([buf], { type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' }), await orderFileName(order,'xlsx'));
   }catch(err){
     console.error(err);
     notify('Ocurrió un error al generar el Excel.','error');
@@ -1886,7 +1902,7 @@ async function shareOrderExcel(order){
     const wb = await buildOrderExcelWorkbook(order);
     const buf = await wb.xlsx.writeBuffer();
     const mime = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
-    await shareBlobOrDownload(new Blob([buf], { type:mime }), 'pedido-dimarin-' + order.id.slice(0,8) + '.xlsx', mime, order, popupWin);
+    await shareBlobOrDownload(new Blob([buf], { type:mime }), await orderFileName(order,'xlsx'), mime, order, popupWin);
   }catch(err){
     console.error(err);
     notify('Ocurrió un error al generar el Excel.','error');
