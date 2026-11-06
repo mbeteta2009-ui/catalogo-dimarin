@@ -438,6 +438,31 @@ body[data-dens="2"] .media-stock{font-size:7.5px;padding:2px 5px;left:5px;bottom
 .pdfopts-quick .linkbtn{background:none;border:0;padding:0;color:var(--gold);font-size:13px;cursor:pointer;text-decoration:underline}
 @media(max-width:420px){.pdfopts-list{grid-template-columns:1fr}}
 
+.modal .edit-box{width:820px}
+.edit-box .eo-sub{color:#777;font-size:13px;margin-top:2px}
+.eo-table td{vertical-align:middle}
+.eo-qty{white-space:nowrap}
+.eo-qty button{width:28px;height:28px;border:1px solid #cfc6b0;background:#fff;border-radius:6px;font-size:16px;cursor:pointer;line-height:1}
+.eo-qty button:disabled{opacity:.35;cursor:default}
+.eo-qty input{width:46px;height:28px;text-align:center;border:1px solid #cfc6b0;border-radius:6px;margin:0 4px;font:inherit}
+.eo-x{border:0;background:none;color:#a33;font-size:16px;cursor:pointer;padding:4px 8px}
+.eo-tag{font-size:11px;font-weight:600;padding:1px 7px;border-radius:10px;margin-left:6px;vertical-align:middle}
+.eo-tag.new{background:#e1f3e6;color:#1f6b3a}.eo-tag.chg{background:#fbf0d4;color:#8a6410}
+.eo-add{position:relative;margin-top:14px}
+.eo-add input{width:100%;padding:10px 12px;border:1px solid #cfc6b0;border-radius:8px;font:inherit;box-sizing:border-box}
+.eo-results{display:none;position:absolute;left:0;right:0;bottom:calc(100% + 4px);background:#fff;border:1px solid #e3d9c3;border-radius:10px;box-shadow:0 14px 34px rgba(0,0,0,.18);max-height:280px;overflow-y:auto;z-index:5}
+.eo-res{display:flex;justify-content:space-between;gap:12px;width:100%;text-align:left;padding:9px 12px;border:0;border-bottom:1px solid #f0ead9;background:#fff;cursor:pointer;font:inherit;font-size:13.5px}
+.eo-res:hover:not(:disabled){background:#fbf4e1}.eo-res:disabled{opacity:.5;cursor:default}
+.eo-res small{display:block;color:#888;font-size:11.5px}.eo-res .r{text-align:right;white-space:nowrap}
+.eo-none{padding:12px;color:#888;font-size:13px}
+.eo-summary{margin-top:16px;border-top:2px solid #111;padding-top:10px;font-size:14px}
+.eo-row{display:flex;justify-content:space-between;padding:3px 0}.eo-row.red{color:#b00020}
+.eo-row.tot{font-weight:700;font-size:17px;border-top:1px solid #ddd;margin-top:4px;padding-top:6px}
+.eo-diff{margin-top:8px;color:#666;font-size:12.5px}
+.eo-warn{margin-top:10px;background:#fdecea;color:#8a1c12;border-radius:8px;padding:8px 12px;font-size:13px}.eo-warn ul{margin:4px 0 0 18px;padding:0}
+.orders-table .etag{display:inline-block;font-size:10.5px;font-weight:600;background:#fbf0d4;color:#8a6410;border-radius:10px;padding:1px 7px;margin-left:6px;vertical-align:middle}
+@media(max-width:640px){.eo-table th:nth-child(3),.eo-table td:nth-child(3){display:none}}
+
 </style>
 </head>
 <body>
@@ -541,6 +566,18 @@ body[data-dens="2"] .media-stock{font-size:7.5px;padding:2px 5px;left:5px;bottom
     <div class="orders-head"><h3>📋 Mis pedidos</h3><button type="button" class="btn btn-outline btn-sm" onclick="closeOrders()">Cerrar</button></div>
     <p class="hint">Todos los pedidos realizados. Descarga cada uno en PDF o Excel, igual al enviado por correo.</p>
     <div id="ordersBody"></div>
+  </div>
+</div>
+
+<!-- EDITAR PEDIDO -->
+<div class="modal" id="editOrderModal" style="z-index:870">
+  <div class="box edit-box">
+    <div class="orders-head"><div><h3 id="editOrderTitle">Editar pedido</h3><div class="eo-sub" id="editOrderSub"></div></div><button type="button" class="btn btn-outline btn-sm" onclick="closeOrderEdit()">Cancelar</button></div>
+    <p class="hint">Quita artículos, cambia cantidades o agrega otros. Al guardar, el inventario se ajusta solo y el pedido se recalcula con los precios y promociones actuales.</p>
+    <div class="orders-wrap"><table class="orders-table eo-table"><thead><tr><th>Artículo</th><th>Cajas</th><th class="num">Precio caja</th><th class="num">Total</th><th></th></tr></thead><tbody id="editLines"></tbody></table></div>
+    <div class="eo-add"><input type="text" id="editSearchInp" placeholder="Agregar artículo: busca por SKU, código o marca" autocomplete="off" oninput="editSearch(this.value)"><div id="editResults" class="eo-results"></div></div>
+    <div id="editSummary" class="eo-summary"></div>
+    <div class="modal-actions"><button class="btn btn-outline" onclick="closeOrderEdit()">Cancelar</button><button class="btn btn-dark" id="editSaveBtn" onclick="saveOrderEdit()">Guardar cambios</button></div>
   </div>
 </div>
 
@@ -940,7 +977,7 @@ function orderFromRow(r){
     id: r.id, total, subtotal: Math.max(subtotal, total), discountTotal: Math.max(0, +(subtotal-total).toFixed(2)),
     promos: r.promos || [], items,
     customerName: r.customer_name, customerPhone: r.customer_phone, customerAddress: r.customer_address || '', seller: r.seller || '',
-    date: new Date(r.created_at)
+    date: new Date(r.created_at), editedAt: r.edited_at ? new Date(r.edited_at) : null, editCount: Number(r.edit_count)||0
   };
 }
 function orderPairs(o){ return o.items.reduce((s,it)=>s + Number(it.qty||0)*Number(it.box_qty||0), 0); }
@@ -982,14 +1019,14 @@ async function loadOrders(fromLogin){
     if(!list.length){ body.innerHTML = '<div class="orders-empty">Todavía no hay pedidos.</div>'; return; }
     const sumTotal = list.reduce((s,o)=>s+o.total,0), sumPairs = list.reduce((s,o)=>s+orderPairs(o),0);
     body.innerHTML =
-      '<div class="orders-wrap"><table class="orders-table"><thead><tr><th>Día</th><th>Cliente</th><th>Vendedor</th><th class="num">Pares</th><th class="num">Total</th><th>Descargar</th></tr></thead><tbody>' +
+      '<div class="orders-wrap"><table class="orders-table"><thead><tr><th>Día</th><th>Cliente</th><th>Vendedor</th><th class="num">Pares</th><th class="num">Total</th><th>Acciones</th></tr></thead><tbody>' +
       list.map(o=>`<tr>
-        <td>${fmtDay(o.date)}<div class="oid">#${o.id.slice(0,8).toUpperCase()}</div></td>
+        <td>${fmtDay(o.date)}<div class="oid">#${o.id.slice(0,8).toUpperCase()}${o.editedAt?` <span class="etag" title="Editado ${fmtDay(o.editedAt)}${o.editCount>1?' ('+o.editCount+' veces)':''}">Editado</span>`:''}</div>${o.editedAt?`<div class="oid">Editado ${fmtDay(o.editedAt)}</div>`:''}</td>
         <td>${esc(o.customerName)}<div class="oid">${esc(o.customerPhone)}</div></td>
         <td>${o.seller ? esc(o.seller) : '—'}</td>
         <td class="num">${orderPairs(o).toLocaleString('es-NI')}</td>
         <td class="num"><b>${money(o.total)}</b></td>
-        <td class="oact"><button class="btn btn-outline btn-sm" onclick="orderDownload('${o.id}','pdf')">PDF</button> <button class="btn btn-outline btn-sm" onclick="orderDownload('${o.id}','xls')">Excel</button></td>
+        <td class="oact"><button class="btn btn-outline btn-sm" onclick="orderDownload('${o.id}','pdf')">PDF</button> <button class="btn btn-outline btn-sm" onclick="orderDownload('${o.id}','xls')">Excel</button> <button class="btn btn-outline btn-sm" onclick="openOrderEdit('${o.id}')">Editar</button></td>
       </tr>`).join('') +
       `</tbody><tfoot><tr><td colspan="3">${list.length} pedido${list.length===1?'':'s'}</td><td class="num">${sumPairs.toLocaleString('es-NI')}</td><td class="num">${money(sumTotal)}</td><td></td></tr></tfoot></table></div>`;
   }catch(err){
@@ -1004,6 +1041,129 @@ function closeOrders(){ ORDERS_PIN=null; ORDERS_CACHE={}; document.getElementByI
 async function orderDownload(id, kind){
   const o = ORDERS_CACHE[id]; if(!o) return;
   if(kind==='pdf') await generateOrderPDF(o); else await generateOrderExcel(o);
+}
+
+/* ---------- EDITAR PEDIDOS CONFIRMADOS ---------- */
+let EDIT = null; // { id, order, orig:{sku:qty}, lines:[{sku,qty}], search:'' }
+function editOrigQty(sku){ return (EDIT && EDIT.orig[sku]) || 0; }
+function editMax(sku){ const it = CAT_BY_SKU[sku]; return (it ? Math.max(0, it.stockBoxes) : 0) + editOrigQty(sku); }
+function openOrderEdit(id){
+  const o = ORDERS_CACHE[id]; if(!o) return;
+  EDIT = { id, order:o, orig:{}, lines:[], search:'', saving:false };
+  o.items.forEach(it=>{
+    EDIT.orig[it.sku] = (EDIT.orig[it.sku]||0) + Number(it.qty||0);
+    if(!CAT_BY_SKU[it.sku]){
+      CAT_BY_SKU[it.sku] = { sku:it.sku, code:it.code, brand:it.brand, gender:it.gender, unitPrice:Number(it.unit_price||0), boxQty:Number(it.box_qty)||1, stockBoxes:0, img:it.img, link:it.link, promo:it.promo||null };
+    }
+    const l = EDIT.lines.find(x=>x.sku===it.sku);
+    if(l) l.qty += Number(it.qty||0); else EDIT.lines.push({ sku:it.sku, qty:Number(it.qty||0) });
+  });
+  document.getElementById('editOrderTitle').textContent = 'Editar pedido #' + id.slice(0,8).toUpperCase();
+  document.getElementById('editOrderSub').textContent = o.customerName + (o.seller ? ' · ' + o.seller : '');
+  const si0 = document.getElementById('editSearchInp'); if(si0) si0.value = '';
+  document.getElementById('editOrderModal').classList.add('open');
+  renderOrderEdit();
+}
+function closeOrderEdit(){ EDIT = null; document.getElementById('editOrderModal').classList.remove('open'); }
+function editQtyMap(){ const m = {}; EDIT.lines.forEach(l=>{ if(l.qty > 0) m[l.sku] = l.qty; }); return m; }
+function editSetQty(sku, q){
+  const l = EDIT.lines.find(x=>x.sku===sku); if(!l) return;
+  q = Math.floor(Number(q)); if(!(q >= 1)) q = 1;
+  const mx = editMax(sku);
+  if(q > mx){ q = mx; notify('Solo hay ' + mx + ' ' + plural(mx,'caja','cajas') + ' disponibles de ' + itemName(CAT_BY_SKU[sku]) + ' (incluye las del pedido).','warn'); }
+  l.qty = q; renderOrderEdit();
+}
+function editStep(sku, d){ const l = EDIT.lines.find(x=>x.sku===sku); if(l) editSetQty(sku, l.qty + d); }
+function editRemove(sku){ EDIT.lines = EDIT.lines.filter(x=>x.sku!==sku); renderOrderEdit(); }
+function editAdd(sku){
+  const ex = EDIT.lines.find(x=>x.sku===sku);
+  if(ex){ editSetQty(sku, ex.qty + 1); }
+  else if(editMax(sku) < 1){ notify('No hay existencias de ese artículo.','warn'); return; }
+  else EDIT.lines.push({ sku, qty:1 });
+  EDIT.search = ''; const si = document.getElementById('editSearchInp'); if(si) si.value = '';
+  renderOrderEdit();
+}
+function editSearch(v){ EDIT.search = v; renderEditResults(); }
+function renderEditResults(){
+  const host = document.getElementById('editResults'); if(!host) return;
+  const q = normText(EDIT.search||'').trim();
+  if(!q){ host.innerHTML = ''; host.style.display = 'none'; return; }
+  const words = q.split(/\s+/);
+  const res = CATALOG.filter(it=>{
+    const h = normText([it.sku, it.code, it.brand, it.gender].join(' '));
+    return words.every(w=>h.includes(w));
+  }).slice(0, 8);
+  host.style.display = 'block';
+  host.innerHTML = res.length ? res.map(it=>{
+    const mx = editMax(it.sku);
+    return `<button type="button" class="eo-res" ${mx<1?'disabled':''} onclick="editAdd('${esc(it.sku)}')"><span><b>${esc(it.brand)}</b> · ${esc(it.code||'')}<small>SKU ${esc(it.sku)}</small></span><span class="r">${money(it.unitPrice*it.boxQty)} / caja<small>${mx<1?'Sin existencia':mx+' '+plural(mx,'caja','cajas')+' disp.'}</small></span></button>`;
+  }).join('') : '<div class="eo-none">Sin resultados.</div>';
+}
+function editChanged(){
+  const cur = editQtyMap(), keys = new Set([...Object.keys(cur), ...Object.keys(EDIT.orig)]);
+  for(const k of keys) if((cur[k]||0) !== (EDIT.orig[k]||0)) return true;
+  return false;
+}
+function renderOrderEdit(){
+  if(!EDIT) return;
+  const qmap = editQtyMap(), calc = calcPromos(qmap);
+  const lineBySku = {}; calc.lines.forEach(l=>{ lineBySku[l.sku] = l; });
+  const body = document.getElementById('editLines');
+  body.innerHTML = EDIT.lines.length ? EDIT.lines.map(l=>{
+    const it = CAT_BY_SKU[l.sku] || {}, cl = lineBySku[l.sku];
+    const mx = editMax(l.sku), delta = l.qty - editOrigQty(l.sku);
+    const tag = !(l.sku in EDIT.orig) ? '<span class="eo-tag new">Nuevo</span>' : (delta !== 0 ? '<span class="eo-tag chg">'+(delta>0?'+':'')+delta+' '+plural(Math.abs(delta),'caja','cajas')+'</span>' : '');
+    const net = cl ? (cl.grossC - cl.discC)/100 : 0;
+    return `<tr>
+      <td><b>${esc(it.brand||'')}</b> · ${esc(it.code||l.sku)} ${tag}<div class="oid">SKU ${esc(l.sku)} · ${it.boxQty>1?'caja de '+it.boxQty:'unitario'}</div></td>
+      <td class="eo-qty"><button type="button" onclick="editStep('${esc(l.sku)}',-1)" ${l.qty<=1?'disabled':''} aria-label="Menos">−</button><input type="number" min="1" max="${mx}" value="${l.qty}" onchange="editSetQty('${esc(l.sku)}',this.value)"><button type="button" onclick="editStep('${esc(l.sku)}',1)" ${l.qty>=mx?'disabled':''} aria-label="Más">+</button><div class="oid">máx. ${mx}</div></td>
+      <td class="num">${money(it.unitPrice*it.boxQty)}</td>
+      <td class="num"><b>${money(net)}</b>${cl&&cl.discC>0?'<div class="oid">con promo</div>':''}</td>
+      <td class="num"><button type="button" class="eo-x" onclick="editRemove('${esc(l.sku)}')" aria-label="Quitar" title="Quitar del pedido">✕</button></td>
+    </tr>`;
+  }).join('') : '<tr><td colspan="5" class="orders-empty">El pedido no tiene artículos. Agrega al menos uno o cancélalo.</td></tr>';
+  let sum = `<div class="eo-row"><span>Subtotal</span><span>${money(calc.subtotalC/100)}</span></div>`;
+  calc.promos.forEach(p=>{ sum += `<div class="eo-row red"><span>${esc(p.label)}</span><span>- ${money(p.amountC/100)}</span></div>`; });
+  sum += `<div class="eo-row tot"><span>Total</span><span>${money(calc.totalC/100)}</span></div>`;
+  const oldTot = EDIT.order.total, newTot = calc.totalC/100;
+  const pairs = calc.lines.reduce((s,l)=>s+l.qty*l.it.boxQty,0);
+  sum += `<div class="eo-diff">Antes: ${money(oldTot)} · ${orderPairs(EDIT.order)} pares &nbsp;→&nbsp; Ahora: ${money(newTot)} · ${pairs} pares</div>`;
+  if(calc.pending.length) sum += `<div class="eo-warn"><b>No se puede guardar todavía:</b><ul>${calc.pending.map(p=>'<li>'+esc(p.text)+'</li>').join('')}</ul></div>`;
+  document.getElementById('editSummary').innerHTML = sum;
+  const btn = document.getElementById('editSaveBtn');
+  btn.disabled = EDIT.saving || !EDIT.lines.length || calc.pending.length > 0 || !editChanged();
+  btn.textContent = EDIT.saving ? 'Guardando…' : 'Guardar cambios';
+  renderEditResults();
+}
+async function saveOrderEdit(){
+  if(!EDIT || EDIT.saving) return;
+  const qmap = editQtyMap();
+  const items = Object.keys(qmap).map(sku=>({ sku, qty:qmap[sku] }));
+  const ok = await uiConfirm('¿Guardar los cambios del pedido #' + EDIT.id.slice(0,8).toUpperCase() + '? Se ajustará el inventario, se recalcularán precios y promociones, y se enviará el pedido actualizado por correo.');
+  if(!ok) return;
+  EDIT.saving = true; renderOrderEdit();
+  try{
+    const { data, error } = await sb.rpc('update_order', { p_pin: ORDERS_PIN, p_id: EDIT.id, p_items: items });
+    if(error) throw error;
+    const old = EDIT.order;
+    const updated = orderFromRow({
+      id: old.id, items: data.items, total: data.total, promos: data.promos,
+      customer_name: old.customerName, customer_phone: old.customerPhone, customer_address: old.customerAddress, seller: old.seller,
+      created_at: old.date.toISOString(), edited_at: data.edited_at, edit_count: data.edit_count
+    });
+    closeOrderEdit();
+    notify('Pedido actualizado. Inventario ajustado.','ok');
+    sendOrderEmailInBackground(updated);
+    loadCatalog();
+    loadOrders();
+  }catch(err){
+    console.error(err);
+    EDIT.saving = false; renderOrderEdit();
+    const m = String(err && err.message || '');
+    if(/PIN/i.test(m)){ closeOrderEdit(); ORDERS_PIN = null; showOrdersLogin('La sesión expiró. Ingresa la contraseña de nuevo.'); return; }
+    await uiAlert(m.startsWith('Stock insuficiente') || /promoci|cancelado|sin art/i.test(m) ? m : 'No se pudo guardar el pedido. Intenta de nuevo.');
+    loadCatalog();
+  }
 }
 
 /* ---------- LOAD CATALOG ---------- */
@@ -1656,7 +1816,7 @@ async function buildOrderPDFDoc(order, silent){
     doc.text('Pedido Mayorista', pageW - marginX, y + 14, { align:'right' });
     doc.setFont('helvetica','normal'); doc.setFontSize(9); doc.setTextColor(110);
     doc.text('Pedido #' + order.id.slice(0,8).toUpperCase(), pageW - marginX, y + 28, { align:'right' });
-    doc.text(order.date.toLocaleString('es-NI'), pageW - marginX, y + 40, { align:'right' });
+    doc.text(order.date.toLocaleString('es-NI') + (order.editedAt ? '   ·   Editado: ' + order.editedAt.toLocaleString('es-NI') : ''), pageW - marginX, y + 40, { align:'right' });
     doc.setTextColor(0);
     y += 58;
     doc.setDrawColor(201,162,75); doc.setLineWidth(1.2);
@@ -1819,6 +1979,7 @@ async function buildOrderExcelWorkbook(order, silent){
   const meta = (k, v) => { sheet.getCell('A'+r).value = k; sheet.getCell('A'+r).font = { bold:true }; sheet.getCell('B'+r).value = v; r++; };
   meta('Pedido:', '#' + order.id.slice(0,8).toUpperCase());
   meta('Fecha:', order.date.toLocaleString('es-NI'));
+  if(order.editedAt) meta('Editado:', order.editedAt.toLocaleString('es-NI'));
   meta('Cliente:', order.customerName);
   meta('Teléfono:', order.customerPhone);
   if(order.seller) meta('Vendedor:', order.seller);
@@ -2090,7 +2251,7 @@ async function sendOrderEmailInBackground(order){
         'Authorization': 'Bearer ' + SUPABASE_ANON_KEY,
         'apikey': SUPABASE_ANON_KEY
       },
-      body: JSON.stringify({ orderId: order.id, pdfBase64, excelBase64 })
+      body: JSON.stringify({ orderId: order.id, pdfBase64, excelBase64, pdfName: await orderFileName(order,'pdf'), excelName: await orderFileName(order,'xlsx') })
     });
     if(!resp.ok){
       const txt = await resp.text().catch(()=> '');
